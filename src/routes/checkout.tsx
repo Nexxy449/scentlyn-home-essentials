@@ -220,8 +220,8 @@ function OptionRow({
   selected: boolean;
   onClick: () => void;
   title: string;
-  subtitle?: string;
-  right?: string;
+  subtitle?: string | undefined;
+  right?: string | undefined;
 }) {
   return (
     <button
