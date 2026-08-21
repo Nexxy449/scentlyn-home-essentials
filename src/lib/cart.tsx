@@ -48,9 +48,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const i = prev.findIndex(
           (x) => x.productSlug === item.productSlug && x.variant === item.variant,
         );
-        if (i === -1) return [...prev, item];
+        const existing = prev[i];
+        if (i === -1 || !existing) return [...prev, item];
         const next = [...prev];
-        next[i] = { ...next[i], quantity: next[i].quantity + item.quantity };
+        next[i] = { ...existing, quantity: existing.quantity + item.quantity };
         return next;
       });
 
