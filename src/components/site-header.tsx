@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Menu, Search, ShoppingBag, Sparkles, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import logoAsset from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { categories, formatPrice, fromPrice, searchProducts } from "@/lib/shop-data";
@@ -23,11 +24,12 @@ export function SiteHeader() {
           <Menu className="h-5 w-5" />
         </button>
 
-        <Link to="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-fresh text-primary-foreground">
-            <Sparkles className="h-5 w-5" />
-          </span>
-          <span className="font-display text-lg font-bold tracking-tight">Scentlyn</span>
+        <Link to="/" className="flex shrink-0 items-center">
+          <img
+            src={logoAsset.url}
+            alt="Scentlyn Laundrymart"
+            className="h-9 w-auto max-w-[140px] object-contain sm:h-10 sm:max-w-[170px]"
+          />
         </Link>
 
         <nav className="mx-auto hidden items-center gap-1 md:flex">

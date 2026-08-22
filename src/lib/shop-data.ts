@@ -26,9 +26,9 @@ import pBathroom from "@/assets/p-bathroom.jpg";
 export const business = {
   name: "Scentlyn",
   tagline: "Scent • Freshness • Home Care",
-  phone: "+254 712 345 678",
-  whatsapp: "254712345678",
-  email: "orders@scentlyn.co.ke",
+  phone: "0721201979",
+  whatsapp: "254721201979",
+  email: "scentlynlaundry@gmail.com",
   location: "Nairobi, Kenya",
   hours: "Mon – Sat: 8:00am – 7:00pm • Sun: 10:00am – 4:00pm",
 };

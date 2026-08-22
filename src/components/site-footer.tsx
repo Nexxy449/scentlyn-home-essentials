@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, Sparkles } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
+import logoAsset from "@/assets/logo.png.asset.json";
 import { business, categories, waLink } from "@/lib/shop-data";
 
 export function SiteFooter() {
@@ -8,12 +9,13 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-border bg-surface">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-fresh text-primary-foreground">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <span className="font-display text-lg font-bold">Scentlyn</span>
-          </div>
+          <Link to="/" className="inline-block">
+            <img
+              src={logoAsset.url}
+              alt="Scentlyn Laundrymart"
+              className="h-10 w-auto max-w-[180px] object-contain"
+            />
+          </Link>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
             {business.tagline}. Premium laundry, cleaning and home fragrance products delivered
             across Kenya.
