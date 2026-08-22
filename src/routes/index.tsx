@@ -37,7 +37,7 @@ function Home() {
             <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
               <Leaf className="h-3.5 w-3.5" /> Scent • Freshness • Home Care
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] md:text-6xl">
+            <h1 className="mt-5 text-[2rem] font-extrabold leading-[1.08] sm:text-5xl md:text-6xl">
               A beautifully cared-for home.
             </h1>
             <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
@@ -81,7 +81,7 @@ function Home() {
             </p>
           </div>
         </header>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5">
           {categories.map((c, i) => (
             <Link
               key={c.slug}

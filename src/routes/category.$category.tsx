@@ -70,7 +70,7 @@ function CategoryPage() {
       </div>
 
       {shown.length > 0 ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">
           {shown.map((p) => (
             <ProductCard key={p.slug} product={p} />
           ))}
