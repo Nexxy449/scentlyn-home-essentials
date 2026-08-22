@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const featured = products.filter((p) => p.featured).slice(0, 6);
+  const featured = products.filter((p) => p.featured).slice(0, 8);
 
   return (
     <>
@@ -37,7 +37,7 @@ function Home() {
             <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
               <Leaf className="h-3.5 w-3.5" /> Scent • Freshness • Home Care
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold leading-[1.05] md:text-6xl">
+            <h1 className="mt-5 text-[2rem] font-extrabold leading-[1.08] sm:text-5xl md:text-6xl">
               A beautifully cared-for home.
             </h1>
             <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
@@ -81,7 +81,7 @@ function Home() {
             </p>
           </div>
         </header>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5">
           {categories.map((c, i) => (
             <Link
               key={c.slug}
@@ -111,39 +111,60 @@ function Home() {
             The products our customers reorder most.
           </p>
         </header>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">
           {featured.map((p) => (
             <ProductCard key={p.slug} product={p} />
           ))}
         </div>
+        <div className="mt-8 flex justify-center">
+          <Button asChild variant="soft" size="lg">
+            <Link to="/category/$category" params={{ category: "home-care" }}>
+              Browse all products
+            </Link>
+          </Button>
+        </div>
       </section>
 
-      {/* Trust */}
-      <section className="border-y border-border bg-surface">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 sm:px-6 md:grid-cols-3">
-          {[
-            {
-              icon: ShieldCheck,
-              title: "Genuine brands only",
-              text: "Ariel, Lenor, Vanish and more — sourced from trusted suppliers.",
-            },
-            {
-              icon: Truck,
-              title: "Fast Kenyan delivery",
-              text: "Same-day options in Nairobi and countrywide courier.",
-            },
-            {
-              icon: MessageCircle,
-              title: "Order how you like",
-              text: "Guest checkout online, or a one-tap WhatsApp order.",
-            },
-          ].map((f) => (
-            <div key={f.title} className="rounded-2xl bg-card p-6 shadow-card">
-              <f.icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-3 font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{f.text}</p>
-            </div>
-          ))}
+      {/* Services */}
+      <section className="bg-gradient-fresh text-primary-foreground">
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">
+          <header className="max-w-xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary-foreground/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">
+              Our services
+            </span>
+            <h2 className="mt-4 text-2xl font-bold md:text-3xl">More than a shop</h2>
+            <p className="mt-2 text-sm text-primary-foreground/80 md:text-base">
+              Everything we do is built around keeping your home effortlessly fresh.
+            </p>
+          </header>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: ShieldCheck,
+                title: "Genuine brands only",
+                text: "Ariel, Lenor, Vanish and more — sourced from trusted suppliers.",
+              },
+              {
+                icon: Truck,
+                title: "Fast Kenyan delivery",
+                text: "Same-day options in Nairobi and countrywide courier.",
+              },
+              {
+                icon: MessageCircle,
+                title: "Order how you like",
+                text: "Guest checkout online, or a one-tap WhatsApp order.",
+              },
+            ].map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-5 backdrop-blur-sm sm:p-6"
+              >
+                <f.icon className="h-6 w-6 shrink-0" />
+                <h3 className="mt-3 font-semibold">{f.title}</h3>
+                <p className="mt-1 text-sm text-primary-foreground/80">{f.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </>

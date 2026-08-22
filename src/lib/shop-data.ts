@@ -12,6 +12,10 @@ import pSurface from "@/assets/p-surface.jpg";
 import pCandle from "@/assets/p-candle.jpg";
 import pToilet from "@/assets/p-toilet.jpg";
 import pDegreaser from "@/assets/p-degreaser.jpg";
+import pDish from "@/assets/p-dish.jpg";
+import pDiffuser from "@/assets/p-diffuser.jpg";
+import pAir from "@/assets/p-air.jpg";
+import pBathroom from "@/assets/p-bathroom.jpg";
 
 /**
  * Structured shop data.
@@ -331,6 +335,181 @@ export const products: Product[] = [
     ],
     featured: true,
     collections: ["new-arrivals"],
+  },
+  {
+    slug: "scentlyn-dishwashing-liquid",
+    name: "Scentlyn Dishwashing Liquid",
+    brand: "Scentlyn",
+    category: "kitchen",
+    subcategory: "kitchen-cleaners",
+    short: "Rich lather that cuts grease, gentle on hands.",
+    description:
+      "A concentrated dishwashing liquid with a rich, long-lasting lather. Cuts through oil and food residue while staying kind to your hands.",
+    benefits: ["Long lasting lather", "Cuts grease fast", "Gentle on hands", "Fresh citrus scent"],
+    image: pDish,
+    variantLabel: "Size",
+    variants: [
+      { label: "500ml", price: 280, inStock: true },
+      { label: "1L", price: 480, inStock: true },
+      { label: "5L Refill", price: 1950, inStock: true },
+    ],
+    featured: true,
+    collections: ["best-sellers"],
+  },
+  {
+    slug: "dishwasher-tablets",
+    name: "All-in-1 Dishwasher Tablets",
+    brand: "Finish",
+    category: "kitchen",
+    subcategory: "dishwasher-products",
+    short: "Sparkling dishes with no pre-rinsing.",
+    description:
+      "Powerful all-in-one tablets with built-in rinse aid and salt action for spotless, shining dishes every cycle.",
+    benefits: ["Built-in rinse aid", "No pre-rinsing needed", "Removes tough tea stains"],
+    image: pDish,
+    variantLabel: "Pack",
+    variants: [
+      { label: "20 Tablets", price: 1150, inStock: true },
+      { label: "40 Tablets", price: 2050, inStock: true },
+      { label: "80 Tablets", price: 3750, inStock: false },
+    ],
+  },
+  {
+    slug: "scentlyn-reed-diffuser",
+    name: "Scentlyn Reed Diffuser",
+    brand: "Scentlyn",
+    category: "scents",
+    subcategory: "diffusers",
+    short: "Quiet, continuous fragrance for any room.",
+    description:
+      "A glass reed diffuser with natural rattan sticks that release a steady, refined scent for up to three months.",
+    benefits: ["Up to 3 months of scent", "Flame free", "Refillable glass bottle"],
+    image: pDiffuser,
+    variantLabel: "Scent",
+    variants: [
+      { label: "White Tea — 100ml", price: 1750, inStock: true },
+      { label: "Amber Musk — 100ml", price: 1750, inStock: true },
+      { label: "Fresh Linen — 200ml", price: 2650, inStock: true },
+    ],
+    featured: true,
+    collections: ["new-arrivals"],
+  },
+  {
+    slug: "room-linen-mist",
+    name: "Room & Linen Mist",
+    brand: "Scentlyn",
+    category: "scents",
+    subcategory: "linen-scents",
+    short: "A light spritz for beds, sofas and curtains.",
+    description:
+      "A fine mist that refreshes fabrics between washes. Spray onto linen, upholstery and curtains for instant freshness.",
+    benefits: ["Safe on fabrics", "Neutralises odours", "Fast drying", "Travel friendly"],
+    image: pAir,
+    variantLabel: "Size",
+    variants: [
+      { label: "150ml", price: 750, inStock: true },
+      { label: "300ml", price: 1250, inStock: true },
+    ],
+    collections: ["new-arrivals"],
+  },
+  {
+    slug: "air-freshener-spray",
+    name: "Air Freshener Spray",
+    category: "scents",
+    subcategory: "air-fresheners",
+    short: "Instant freshness, no heavy perfume.",
+    description:
+      "An odour-neutralising air freshener that clears cooking and pet smells instead of masking them.",
+    benefits: ["Neutralises odours", "Light clean scent", "Works in any room"],
+    image: pAir,
+    variantLabel: "Scent",
+    variants: [
+      { label: "Cotton Fresh — 300ml", price: 480, inStock: true },
+      { label: "Citrus Zest — 300ml", price: 480, inStock: true },
+    ],
+  },
+  {
+    slug: "bathroom-cleaner-spray",
+    name: "Bathroom Cleaner Spray",
+    category: "bathroom",
+    subcategory: "bathroom-cleaners",
+    short: "Removes limescale and soap scum fast.",
+    description:
+      "A spray-on bathroom cleaner for tiles, showers, taps and basins. Dissolves limescale and soap scum with a quick wipe.",
+    benefits: ["Dissolves limescale", "Shine without scrubbing", "Safe on chrome and tiles"],
+    image: pBathroom,
+    variantLabel: "Size",
+    variants: [
+      { label: "500ml Spray", price: 460, inStock: true },
+      { label: "750ml Spray", price: 620, inStock: true },
+    ],
+    featured: true,
+  },
+  {
+    slug: "toilet-rim-blocks",
+    name: "Toilet Rim Freshener Blocks",
+    category: "bathroom",
+    subcategory: "toilet-fresheners",
+    short: "Fresh with every flush.",
+    description:
+      "Rim blocks that clean, protect against limescale and release fragrance with every flush.",
+    benefits: ["Fresh after every flush", "Limescale protection", "Up to 4 weeks per block"],
+    image: pToilet,
+    variantLabel: "Pack",
+    variants: [
+      { label: "Single Block", price: 260, inStock: true },
+      { label: "3 Pack", price: 690, inStock: true },
+    ],
+  },
+  {
+    slug: "microfibre-cloth-set",
+    name: "Microfibre Cloth Set",
+    category: "home-care",
+    subcategory: "cleaning-aids",
+    short: "Streak-free cleaning cloths that last.",
+    description:
+      "Durable microfibre cloths that lift dust and grime with just water. Machine washable and reusable hundreds of times.",
+    benefits: ["Streak free", "Works with just water", "Machine washable"],
+    image: pBathroom,
+    variantLabel: "Pack",
+    variants: [
+      { label: "3 Cloths", price: 390, inStock: true },
+      { label: "6 Cloths", price: 690, inStock: true },
+    ],
+  },
+  {
+    slug: "washing-machine-cleaner",
+    name: "Washing Machine Cleaner",
+    brand: "Dr. Beckmann",
+    category: "laundry",
+    subcategory: "machine-care",
+    short: "Descales and deodorises your machine.",
+    description:
+      "A deep-clean treatment that removes limescale, detergent residue and odours from the drum, hoses and seals.",
+    benefits: ["Removes odours", "Descales the drum", "Use monthly", "Extends machine life"],
+    image: pLiquid,
+    variantLabel: "Size",
+    variants: [
+      { label: "250ml", price: 690, inStock: true },
+      { label: "3 x 250ml", price: 1850, inStock: true },
+    ],
+  },
+  {
+    slug: "whites-brightener-powder",
+    name: "Whites Brightener Powder",
+    brand: "Vanish",
+    category: "laundry",
+    subcategory: "whites-fabric-care",
+    short: "Brings dull whites back to bright.",
+    description:
+      "Oxygen powder that lifts greying and yellowing from whites without chlorine bleach. Soak or add to the wash.",
+    benefits: ["Chlorine free", "Restores bright whites", "Soak or in-wash"],
+    image: pStain,
+    variantLabel: "Size",
+    variants: [
+      { label: "470g", price: 890, inStock: true },
+      { label: "1kg", price: 1690, inStock: true },
+    ],
   },
 ];
 
