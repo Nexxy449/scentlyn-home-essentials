@@ -104,8 +104,8 @@ export const categories: Category[] = [
   },
   {
     slug: "scents",
-    name: "Scents",
-    blurb: "Candles, diffusers & home fragrance",
+    name: "Home Fragrance",
+    blurb: "Candles, diffusers & beautiful scents",
     image: scentsImg,
     subcategories: [
       { slug: "scented-candles", name: "Scented Candles" },
