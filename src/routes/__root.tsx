@@ -15,6 +15,7 @@ import { CartProvider } from "@/lib/cart";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
+import { WhatsappFab } from "@/components/whatsapp-fab";
 
 function NotFoundComponent() {
   return (
@@ -81,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Scentlyn — Laundry, Home Care & Scents in Kenya" },
+      { title: "Scentlyn Home Essentials — Scent, Freshness & Home Care" },
       {
         name: "description",
         content:
@@ -135,6 +136,7 @@ function RootComponent() {
             <Outlet />
           </main>
           <SiteFooter />
+          <WhatsappFab />
           <Toaster position="top-center" />
         </div>
       </CartProvider>
