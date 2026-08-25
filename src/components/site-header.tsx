@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import logoAsset from "@/assets/logo.png.asset.json";
+import logoUrl from "@/assets/logo.jpg";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { categories, formatPrice, fromPrice, searchProducts } from "@/lib/shop-data";
@@ -35,7 +35,7 @@ export function SiteHeader() {
 
         <Link to="/" className="flex shrink-0 items-center" aria-label="Scentlyn home">
           <img
-            src={logoAsset.url}
+            src={logoUrl}
             alt="Scentlyn Home Essentials"
             className="h-9 w-auto max-w-[132px] object-contain sm:h-11 sm:max-w-[170px]"
           />
