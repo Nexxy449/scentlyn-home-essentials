@@ -117,6 +117,7 @@ export interface FileRoutesByTo {
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
+'/admin/login': typeof AdminLoginRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +150,7 @@ export interface FileRouteTypes {
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
+    | '/admin/login'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -163,6 +165,7 @@ export interface FileRouteTypes {
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
+    | '/admin/login'
   id:
     | '__root__'
     | '/'
@@ -177,6 +180,7 @@ export interface FileRouteTypes {
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
+    | '/admin/login'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -281,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+  '/admin/login': {
+  id: '/admin/login'
+  path: '/admin/login'
+  fullPath: '/admin/login'
+  preLoaderRoute: typeof AdminLoginRouteImport
+  parentRoute: typeof rootRouteImport
+        }
   }
 }
 
