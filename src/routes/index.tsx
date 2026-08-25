@@ -106,10 +106,14 @@ function Home() {
             <img
               src={heroImg}
               alt="A candle and reed diffuser beside folded towels in a sunlit living room"
-              width={1280}
-              height={1600}
+              width={1100}
+              height={1375}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="h-full max-h-[560px] w-full object-cover"
             />
+
           </div>
         </div>
       </section>
