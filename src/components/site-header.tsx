@@ -124,7 +124,7 @@ function Portal({ children }: { children: React.ReactNode }) {
 function MobileMenu({ onClose }: { onClose: () => void }) {
   return (
     <Portal>
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background md:hidden">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-background md:hidden">
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         <span className="font-display text-lg font-bold">Menu</span>
         <button
