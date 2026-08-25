@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import logoUrl from "@/assets/logo.jpg";
 import { Button } from "@/components/ui/button";
@@ -113,8 +114,16 @@ export function SiteHeader() {
   );
 }
 
+function Portal({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return createPortal(children, document.body);
+}
+
 function MobileMenu({ onClose }: { onClose: () => void }) {
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 overflow-y-auto bg-background md:hidden">
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         <span className="font-display text-lg font-bold">Menu</span>
@@ -172,6 +181,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
         </Link>
       </nav>
     </div>
+    </Portal>
   );
 }
 
@@ -186,7 +196,8 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background/98 backdrop-blur">
+    <Portal>
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-background">
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-4">
         <form
           onSubmit={(e) => {
@@ -264,5 +275,6 @@ function SearchOverlay({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
