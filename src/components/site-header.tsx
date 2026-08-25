@@ -38,8 +38,13 @@ export function SiteHeader() {
           <img
             src={logoUrl}
             alt="Scentlyn Home Essentials"
+            width={360}
+            height={360}
+            fetchPriority="high"
+            decoding="async"
             className="h-9 w-auto max-w-[132px] object-contain sm:h-11 sm:max-w-[170px]"
           />
+
         </Link>
 
         <nav className="mx-auto hidden items-center gap-1 md:flex" aria-label="Main">
