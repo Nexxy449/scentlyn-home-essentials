@@ -21,6 +21,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
 import { Route as PoliciesPolicyRouteImport } from './routes/policies.$policy'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/admin/login': typeof AdminLoginRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesById {
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/admin/login': typeof AdminLoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,6 +192,7 @@ export interface RootRouteChildren {
   CategoryCategoryRoute: typeof CategoryCategoryRoute
   PoliciesPolicyRoute: typeof PoliciesPolicyRoute
   ProductSlugRoute: typeof ProductSlugRoute
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -288,6 +297,8 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryCategoryRoute: CategoryCategoryRoute,
   PoliciesPolicyRoute: PoliciesPolicyRoute,
   ProductSlugRoute: ProductSlugRoute,
+  AdminLoginRoute,
+  
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
