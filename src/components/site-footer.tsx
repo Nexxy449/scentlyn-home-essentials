@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
-import logoAsset from "@/assets/logo.png.asset.json";
+import logoUrl from "@/assets/logo.jpg";
 import { business, categories, waLink } from "@/lib/shop-data";
 import { policyLinks } from "@/lib/site-content";
 
@@ -12,7 +12,7 @@ export function SiteFooter() {
         <div className="md:col-span-1">
           <Link to="/" className="inline-block">
             <img
-              src={logoAsset.url}
+              src={logoUrl}
               alt="Scentlyn Home Essentials"
               loading="lazy"
               className="h-11 w-auto max-w-[180px] object-contain"
