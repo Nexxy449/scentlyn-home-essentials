@@ -18,7 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
+    if (location.pathname === "/admin/login") {
+      return;
+    }
+
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !session) {
