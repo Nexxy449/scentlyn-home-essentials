@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -18,10 +19,11 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
 import { Route as PoliciesPolicyRouteImport } from './routes/policies.$policy'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as SrcRoutesAdminIndexRouteImport } from './routes/src/routes/admin.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -68,6 +75,11 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
   id: '/category/$category',
   path: '/category/$category',
@@ -83,15 +95,16 @@ const ProductSlugRoute = ProductSlugRouteImport.update({
   path: '/product/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
+const SrcRoutesAdminIndexRoute = SrcRoutesAdminIndexRouteImport.update({
+  id: '/src/routes/admin/',
+  path: '/src/routes/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -99,14 +112,16 @@ export interface FileRoutesByFullPath {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/admin/login': typeof AdminLoginRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
-  '/admin/login': typeof AdminLoginRoute
+  '/src/routes/admin/': typeof SrcRoutesAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -114,15 +129,17 @@ export interface FileRoutesByTo {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/admin/login': typeof AdminLoginRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
-'/admin/login': typeof AdminLoginRoute
+  '/src/routes/admin': typeof SrcRoutesAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -130,16 +147,18 @@ export interface FileRoutesById {
   '/order-confirmed': typeof OrderConfirmedRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/admin/login': typeof AdminLoginRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/policies/$policy': typeof PoliciesPolicyRoute
   '/product/$slug': typeof ProductSlugRoute
-  '/admin/login': typeof AdminLoginRoute
+  '/src/routes/admin/': typeof SrcRoutesAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -147,14 +166,16 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/search'
     | '/shop'
+    | '/admin/login'
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
-    | '/admin/login'
+    | '/src/routes/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -162,14 +183,16 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/search'
     | '/shop'
+    | '/admin/login'
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
-    | '/admin/login'
+    | '/src/routes/admin'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/cart'
     | '/checkout'
     | '/contact'
@@ -177,15 +200,17 @@ export interface FileRouteTypes {
     | '/order-confirmed'
     | '/search'
     | '/shop'
+    | '/admin/login'
     | '/category/$category'
     | '/policies/$policy'
     | '/product/$slug'
-    | '/admin/login'
+    | '/src/routes/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -196,7 +221,7 @@ export interface RootRouteChildren {
   CategoryCategoryRoute: typeof CategoryCategoryRoute
   PoliciesPolicyRoute: typeof PoliciesPolicyRoute
   ProductSlugRoute: typeof ProductSlugRoute
-  AdminLoginRoute: typeof AdminLoginRoute
+  SrcRoutesAdminIndexRoute: typeof SrcRoutesAdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -213,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -264,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/category/$category': {
       id: '/category/$category'
       path: '/category/$category'
@@ -285,19 +324,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-  '/admin/login': {
-  id: '/admin/login'
-  path: '/admin/login'
-  fullPath: '/admin/login'
-  preLoaderRoute: typeof AdminLoginRouteImport
-  parentRoute: typeof rootRouteImport
-        }
+    '/src/routes/admin/': {
+      id: '/src/routes/admin/'
+      path: '/src/routes/admin'
+      fullPath: '/src/routes/admin/'
+      preLoaderRoute: typeof SrcRoutesAdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
@@ -308,8 +358,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoryCategoryRoute: CategoryCategoryRoute,
   PoliciesPolicyRoute: PoliciesPolicyRoute,
   ProductSlugRoute: ProductSlugRoute,
-  AdminLoginRoute,
-  
+  SrcRoutesAdminIndexRoute: SrcRoutesAdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
