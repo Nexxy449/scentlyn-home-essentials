@@ -43,18 +43,39 @@ function AdminDashboard() {
   useEffect(() => {
     let cancelled = false;
     async function loadOverview() {
+      // Explicitly refresh first so PostgREST receives a current authenticated JWT.
+      const { data: sessionData, error: sessionError } = await supabase.auth.refreshSession();
+      if (cancelled) return;
+      if (sessionError || !sessionData.session) {
+        setOverview((current) => ({ ...current, loading: false, error: "Your admin session has expired. Please sign in again." }));
+        return;
+      }
+
       const [products, categories, orders, payments] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }),
         supabase.from("categories").select("id", { count: "exact", head: true }),
         supabase.from("orders").select("id", { count: "exact", head: true }),
         supabase.from("payments").select("amount, status"),
       ]);
-      const firstError = products.error || categories.error || orders.error || payments.error;
       if (cancelled) return;
-      if (firstError) {
-        setOverview((current) => ({ ...current, loading: false, error: "Unable to load dashboard data." }));
+
+      const failed = [
+        ["products", products.error],
+        ["categories", categories.error],
+        ["orders", orders.error],
+        ["payments", payments.error],
+      ].find(([, error]) => error);
+
+      if (failed) {
+        const [resource, error] = failed;
+        setOverview((current) => ({
+          ...current,
+          loading: false,
+          error: `Unable to load ${resource} data${error?.message ? `: ${error.message}` : "."}`,
+        }));
         return;
       }
+
       const revenue = (payments.data ?? [])
         .filter((payment) => payment.status === "paid")
         .reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
@@ -65,8 +86,7 @@ function AdminDashboard() {
   }, []);
 
   async function handleLogout() {
-    setLoggingOut(true);
-    setLogoutError("");
+    setLoggingOut(true); setLogoutError("");
     const { error } = await supabase.auth.signOut({ scope: "local" });
     if (error) { setLogoutError("Unable to sign out. Please try again."); setLoggingOut(false); return; }
     const { data: { session } } = await supabase.auth.getSession();
