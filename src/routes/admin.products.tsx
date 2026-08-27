@@ -7,30 +7,7 @@ import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/products")({ component: AdminProducts });
 
-type Product = { id: string; name: string; price: number | null; category_id: string | null; is_active?: boolean | null; created_at?: string | null };
+type Variant = { id:string; name:string; price:number|null; stock_quantity:number|null; active:boolean|null };
+type Product = { id:string; name:string; category_id:string|null; active:boolean|null; created_at:string|null; product_variants:Variant[]|null };
 
-function AdminProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    async function loadProducts() {
-      const { data, error } = await supabase.from("products").select("id,name,price,category_id,is_active,created_at").order("created_at", { ascending: false });
-      if (cancelled) return;
-      if (error) { setError(error.message || "Unable to load products."); setLoading(false); return; }
-      setProducts(data ?? []); setLoading(false);
-    }
-    void loadProducts();
-    return () => { cancelled = true; };
-  }, []);
-
-  const filtered = products.filter((product) => product.name.toLowerCase().includes(query.toLowerCase()));
-
-  return <div className="space-y-6">
-    <div><p className="text-sm font-medium text-muted-foreground">Catalogue</p><h2 className="mt-1 text-3xl font-semibold tracking-tight">Products</h2><p className="mt-2 text-muted-foreground">Read-only product catalogue. Editing will be enabled in a later phase.</p></div>
-    <Card><CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle>All products</CardTitle><CardDescription>{loading ? "Loading catalogue..." : `${filtered.length} of ${products.length} products`}</CardDescription></div><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search products" className="pl-9" /></div></CardHeader><CardContent>{error ? <p className="text-sm text-destructive">{error}</p> : loading ? <p className="py-8 text-sm text-muted-foreground">Loading products…</p> : filtered.length === 0 ? <p className="py-8 text-sm text-muted-foreground">No products found.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-sm"><thead className="border-b text-left text-muted-foreground"><tr><th className="pb-3 font-medium">Product</th><th className="pb-3 font-medium">Price</th><th className="pb-3 font-medium">Status</th></tr></thead><tbody>{filtered.map((product) => <tr key={product.id} className="border-b last:border-0"><td className="py-4 font-medium"><span className="inline-flex items-center gap-2"><Package className="size-4 text-muted-foreground"/>{product.name}</span></td><td className="py-4">KSh {Number(product.price ?? 0).toLocaleString()}</td><td className="py-4"><span className="rounded-full border px-2 py-1 text-xs">{product.is_active === false ? "Inactive" : "Active"}</span></td></tr>)}</tbody></table></div>}</CardContent></Card>
-  </div>;
-}
+function AdminProducts(){const [products,setProducts]=useState<Product[]>([]);const [query,setQuery]=useState("");const [loading,setLoading]=useState(true);const [error,setError]=useState("");useEffect(()=>{let cancelled=false;async function load(){const {data,error}=await supabase.from("products").select("id,name,category_id,active,created_at,product_variants(id,name,price,stock_quantity,active)").order("created_at",{ascending:false});if(cancelled)return;if(error){setError(error.message||"Unable to load products.");setLoading(false);return}setProducts((data??[]) as Product[]);setLoading(false)}void load();return()=>{cancelled=true}},[]);const filtered=products.filter(p=>p.name.toLowerCase().includes(query.toLowerCase()));const priceLabel=(p:Product)=>{const prices=(p.product_variants??[]).filter(v=>v.active!==false&&v.price!=null).map(v=>Number(v.price));if(!prices.length)return "No active price";const min=Math.min(...prices),max=Math.max(...prices);return min===max?`KSh ${min.toLocaleString()}`:`KSh ${min.toLocaleString()} – ${max.toLocaleString()}`};return <div className="space-y-6"><div><p className="text-sm font-medium text-muted-foreground">Catalogue</p><h2 className="mt-1 text-3xl font-semibold tracking-tight">Products</h2><p className="mt-2 text-muted-foreground">Live catalogue data from the same Supabase products and product_variants tables used by the store.</p></div><Card><CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle>All products</CardTitle><CardDescription>{loading?"Loading catalogue...":`${filtered.length} of ${products.length} products`}</CardDescription></div><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search products" className="pl-9"/></div></CardHeader><CardContent>{error?<p className="text-sm text-destructive">{error}</p>:loading?<p className="py-8 text-sm text-muted-foreground">Loading products…</p>:filtered.length===0?<p className="py-8 text-sm text-muted-foreground">No products found.</p>:<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead className="border-b text-left text-muted-foreground"><tr><th className="pb-3 font-medium">Product</th><th className="pb-3 font-medium">Variants</th><th className="pb-3 font-medium">Price</th><th className="pb-3 font-medium">Status</th></tr></thead><tbody>{filtered.map(p=>{const variants=p.product_variants??[];return <tr key={p.id} className="border-b last:border-0"><td className="py-4 font-medium"><span className="inline-flex items-center gap-2"><Package className="size-4 text-muted-foreground"/>{p.name}</span></td><td className="py-4">{variants.length}</td><td className="py-4">{priceLabel(p)}</td><td className="py-4"><span className="rounded-full border px-2 py-1 text-xs">{p.active===false?"Inactive":"Active"}</span></td></tr>})}</tbody></table></div>}</CardContent></Card></div>}
