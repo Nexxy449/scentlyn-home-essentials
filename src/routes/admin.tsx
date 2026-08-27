@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
+    // /admin/login is a child route of /admin, so it must bypass the admin guard.
+    if (location.pathname === "/admin/login") return;
+
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) throw redirect({ to: "/admin/login" });
 
@@ -80,23 +83,19 @@ function AdminDashboard() {
 
   async function handleLogout() {
     if (loggingOut) return;
-
     setLoggingOut(true);
     setLogoutError("");
-
     try {
       const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) {
         setLogoutError("Unable to sign out. Please try again.");
         return;
       }
-
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setLogoutError("Your session is still active. Please try again.");
         return;
       }
-
       await navigate({ to: "/admin/login", replace: true });
     } catch {
       setLogoutError("Unable to sign out. Please try again.");
