@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async ({ location }) => {
-    if (location.pathname === "/admin/login") return;
+  beforeLoad: async () => {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session) throw redirect({ to: "/admin/login" });
+
     const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
     if (adminError || !isAdmin) {
       await supabase.auth.signOut({ scope: "local" });
@@ -79,17 +79,30 @@ function AdminDashboard() {
   }, [navigate]);
 
   async function handleLogout() {
+    if (loggingOut) return;
+
     setLoggingOut(true);
     setLogoutError("");
-    const { error } = await supabase.auth.signOut({ scope: "local" });
-    if (error) {
-      // Do not leave the user stranded in the admin UI if the server sign-out request fails.
-      localStorage.removeItem("supabase.auth.token");
-      setLoggingOut(false);
+
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) {
+        setLogoutError("Unable to sign out. Please try again.");
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setLogoutError("Your session is still active. Please try again.");
+        return;
+      }
+
       await navigate({ to: "/admin/login", replace: true });
-      return;
+    } catch {
+      setLogoutError("Unable to sign out. Please try again.");
+    } finally {
+      setLoggingOut(false);
     }
-    await navigate({ to: "/admin/login", replace: true });
   }
 
   function selectSection(label: string) { setActiveSection(label); setMobileMenuOpen(false); }
