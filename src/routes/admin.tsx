@@ -43,14 +43,12 @@ function AdminDashboard() {
   useEffect(() => {
     let cancelled = false;
     async function loadOverview() {
-      // Explicitly refresh first so PostgREST receives a current authenticated JWT.
-      const { data: sessionData, error: sessionError } = await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (cancelled) return;
-      if (sessionError || !sessionData.session) {
-        setOverview((current) => ({ ...current, loading: false, error: "Your admin session has expired. Please sign in again." }));
+      if (sessionError || !session) {
+        setOverview((current) => ({ ...current, loading: false, error: "Your admin session could not be loaded. Please sign in again." }));
         return;
       }
-
       const [products, categories, orders, payments] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }),
         supabase.from("categories").select("id", { count: "exact", head: true }),
@@ -58,39 +56,39 @@ function AdminDashboard() {
         supabase.from("payments").select("amount, status"),
       ]);
       if (cancelled) return;
-
-      const failed = [
-        ["products", products.error],
-        ["categories", categories.error],
-        ["orders", orders.error],
-        ["payments", payments.error],
-      ].find(([, error]) => error);
-
+      const failed = [["products", products.error], ["categories", categories.error], ["orders", orders.error], ["payments", payments.error]].find(([, error]) => error);
       if (failed) {
         const [resource, error] = failed;
-        setOverview((current) => ({
-          ...current,
-          loading: false,
-          error: `Unable to load ${resource} data${error?.message ? `: ${error.message}` : "."}`,
-        }));
+        setOverview((current) => ({ ...current, loading: false, error: `Unable to load ${resource} data${error?.message ? `: ${error.message}` : "."}` }));
         return;
       }
-
-      const revenue = (payments.data ?? [])
-        .filter((payment) => payment.status === "paid")
-        .reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
+      const revenue = (payments.data ?? []).filter((payment) => payment.status === "paid").reduce((sum, payment) => sum + Number(payment.amount ?? 0), 0);
       setOverview({ products: products.count ?? 0, categories: categories.count ?? 0, orders: orders.count ?? 0, revenue, loading: false, error: "" });
     }
     loadOverview();
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        void navigate({ to: "/admin/login", replace: true });
+      }
+    });
+    return () => listener.subscription.unsubscribe();
+  }, [navigate]);
+
   async function handleLogout() {
-    setLoggingOut(true); setLogoutError("");
+    setLoggingOut(true);
+    setLogoutError("");
     const { error } = await supabase.auth.signOut({ scope: "local" });
-    if (error) { setLogoutError("Unable to sign out. Please try again."); setLoggingOut(false); return; }
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) { setLogoutError("Unable to clear the session. Please try again."); setLoggingOut(false); return; }
+    if (error) {
+      // Do not leave the user stranded in the admin UI if the server sign-out request fails.
+      localStorage.removeItem("supabase.auth.token");
+      setLoggingOut(false);
+      await navigate({ to: "/admin/login", replace: true });
+      return;
+    }
     await navigate({ to: "/admin/login", replace: true });
   }
 
