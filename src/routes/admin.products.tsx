@@ -1,63 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ImageOff, Package, Search } from "lucide-react";
-import { getCatalogue } from "@/lib/catalogue";
-import type { Product } from "@/lib/shop-data";
+import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, ImageOff, Package, Search } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { products as presentationProducts } from "@/lib/shop-data";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/admin/products")({ component: AdminProducts });
-
-function AdminProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const catalogue = await getCatalogue();
-        if (!cancelled) setProducts(catalogue.products);
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load products.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    void load();
-    return () => { cancelled = true; };
-  }, []);
-
-  const filtered = products.filter((p) => {
-    const needle = query.trim().toLowerCase();
-    return !needle || p.name.toLowerCase().includes(needle) || p.slug.toLowerCase().includes(needle);
-  });
-
-  const priceLabel = (p: Product) => {
-    const prices = p.variants.filter((v) => v.inStock).map((v) => v.price);
-    const source = prices.length ? prices : p.variants.map((v) => v.price);
-    if (!source.length) return "No variants";
-    const min = Math.min(...source);
-    const max = Math.max(...source);
-    return min === max ? `KSh ${min.toLocaleString()}` : `KSh ${min.toLocaleString()} – ${max.toLocaleString()}`;
-  };
-
-  return <div className="space-y-6">
-    <div>
-      <p className="text-sm font-medium text-muted-foreground">Catalogue</p>
-      <h2 className="mt-1 text-3xl font-semibold tracking-tight">Products</h2>
-      <p className="mt-2 text-muted-foreground">The same catalogue service used by the storefront, combining live Supabase commerce data with the verified product image mapping.</p>
-    </div>
-    <Card>
-      <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><CardTitle>All products</CardTitle><CardDescription>{loading ? "Loading catalogue..." : `${filtered.length} of ${products.length} products`}</CardDescription></div>
-        <div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products" className="pl-9"/></div>
-      </CardHeader>
-      <CardContent>
-        {error ? <p className="text-sm text-destructive">{error}</p> : loading ? <p className="py-8 text-sm text-muted-foreground">Loading products…</p> : filtered.length === 0 ? <p className="py-8 text-sm text-muted-foreground">No products found.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-sm"><thead className="border-b text-left text-muted-foreground"><tr><th className="pb-3 font-medium">Image</th><th className="pb-3 font-medium">Product</th><th className="pb-3 font-medium">Variants</th><th className="pb-3 font-medium">Price</th><th className="pb-3 font-medium">Status</th></tr></thead><tbody>{filtered.map((p) => <tr key={p.slug} className="border-b last:border-0"><td className="py-3">{p.image ? <img src={p.image} alt={p.name} className="size-14 rounded-md border object-cover"/> : <span className="flex size-14 items-center justify-center rounded-md border bg-muted text-muted-foreground"><ImageOff className="size-5"/></span>}</td><td className="py-4 font-medium"><span className="inline-flex items-center gap-2"><Package className="size-4 text-muted-foreground"/>{p.name}</span><p className="mt-1 text-xs font-normal text-muted-foreground">/{p.slug}</p></td><td className="py-4">{p.variants.length}</td><td className="py-4">{priceLabel(p)}</td><td className="py-4"><span className="rounded-full border px-2 py-1 text-xs">{p.variants.some((v) => v.inStock) ? "Active" : "Out of stock"}</span></td></tr>)}</tbody></table></div>}
-      </CardContent>
-    </Card>
-  </div>;
-}
+export const Route=createFileRoute("/admin/products")({component:AdminProducts});
+type Variant={id:string;name:string;sku:string;price:number;stock_quantity:number;active:boolean};type ProductRow={id:string;name:string;slug:string;image_url:string|null;active:boolean;product_variants:Variant[]|null};type Filter="all"|"low"|"out"|"active"|"inactive";const LOW_STOCK=5;
+function AdminProducts(){const[products,setProducts]=useState<ProductRow[]>([]),[query,setQuery]=useState(""),[filter,setFilter]=useState<Filter>("all"),[loading,setLoading]=useState(true),[error,setError]=useState("");useEffect(()=>{let cancelled=false;const load=async()=>{setLoading(true);const{data,error}=await supabase.from("products").select("id,name,slug,image_url,active,product_variants(id,name,sku,price,stock_quantity,active)").order("name");if(cancelled)return;if(error)setError(error.message);else setProducts((data??[]) as ProductRow[]);setLoading(false)};void load();return()=>{cancelled=true}},[]);const filtered=useMemo(()=>products.filter(p=>{const q=query.trim().toLowerCase();const vs=(p.product_variants??[]).filter(v=>v.active);const stock=vs.reduce((n,v)=>n+v.stock_quantity,0);const matchSearch=!q||p.name.toLowerCase().includes(q)||p.slug.toLowerCase().includes(q);const match=filter==="all"||(filter==="active"&&p.active)||(filter==="inactive"&&!p.active)||(filter==="out"&&vs.length>0&&vs.every(v=>v.stock_quantity<=0))||(filter==="low"&&vs.some(v=>v.stock_quantity>0&&v.stock_quantity<=LOW_STOCK));return matchSearch&&match}),[products,query,filter]);const image=(p:ProductRow)=>presentationProducts.find(x=>x.slug===p.slug)?.image||p.image_url||"";return <div className="space-y-6"><div><p className="text-sm font-medium text-muted-foreground">Catalogue</p><h2 className="mt-1 text-3xl font-semibold tracking-tight">Products</h2><p className="mt-2 text-muted-foreground">Live products and stock from the same Supabase catalogue used by the storefront.</p></div>{error&&<p className="rounded-lg border border-destructive/30 p-3 text-sm text-destructive">{error}</p>}<Card><CardHeader className="gap-4"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"><div><CardTitle>Inventory</CardTitle><CardDescription>{loading?"Loading catalogue...":`${filtered.length} of ${products.length} products`}</CardDescription></div><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search products" className="pl-9"/></div></div><div className="flex flex-wrap gap-2">{(["all","low","out","active","inactive"] as Filter[]).map(f=><Button key={f} size="sm" variant={filter===f?"default":"outline"} onClick={()=>setFilter(f)}>{f==="low"?"Low stock":f==="out"?"Out of stock":f.charAt(0).toUpperCase()+f.slice(1)}</Button>)}</div></CardHeader><CardContent>{loading?<p className="py-8 text-sm text-muted-foreground">Loading products…</p>:filtered.length===0?<p className="py-8 text-sm text-muted-foreground">No products found for this filter.</p>:<div className="overflow-x-auto"><table className="w-full min-w-[900px] text-sm"><thead className="border-b text-left text-muted-foreground"><tr><th className="pb-3">Image</th><th className="pb-3">Product</th><th className="pb-3">Variant</th><th className="pb-3">SKU</th><th className="pb-3">Price</th><th className="pb-3">Stock</th><th className="pb-3">Status</th></tr></thead><tbody>{filtered.flatMap(p=>{const vs=p.product_variants??[];const rows=vs.length?vs:[null];return rows.map((v,i)=><tr key={v?.id??p.id} className="border-b last:border-0"><td className="py-3">{i===0?(image(p)?<img src={image(p)} alt={p.name} className="size-14 rounded-md border object-cover"/>:<span className="flex size-14 items-center justify-center rounded-md border bg-muted text-muted-foreground"><ImageOff className="size-5"/></span>):null}</td><td className="py-3 font-medium">{i===0&&<><span className="inline-flex items-center gap-2"><Package className="size-4 text-muted-foreground"/>{p.name}</span><p className="mt-1 text-xs font-normal text-muted-foreground">/{p.slug}</p></>}</td><td>{v?.name??"No variants"}</td><td className="text-muted-foreground">{v?.sku??"—"}</td><td>{v?`KSh ${Number(v.price).toLocaleString()}`:"—"}</td><td>{v?<span className="inline-flex items-center gap-1">{v.stock_quantity>0&&v.stock_quantity<=LOW_STOCK&&<AlertTriangle className="size-4"/>}{v.stock_quantity}</span>:"—"}</td><td><span className="rounded-full border px-2 py-1 text-xs">{!p.active?"Inactive":!v?.active?"Variant inactive":!v||v.stock_quantity<=0?"Out of stock":v.stock_quantity<=LOW_STOCK?"Low stock":"In stock"}</span></td></tr>)})}</tbody></table></div>}</CardContent></Card></div>}
