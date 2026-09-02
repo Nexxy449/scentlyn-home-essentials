@@ -9,6 +9,8 @@ const inputSchema = z.object({
   method: z.enum(["mpesa", "card"]),
 });
 
+const verifySchema = z.object({ reference: z.string().min(1) });
+
 type PaystackResponse = {
   status?: boolean;
   message?: string;
@@ -18,6 +20,8 @@ type PaystackResponse = {
     reference?: string;
     status?: string;
     display_text?: string;
+    amount?: number;
+    currency?: string;
   };
 };
 
@@ -48,8 +52,22 @@ async function paystackRequest(path: string, body: Record<string, unknown>) {
     body: JSON.stringify(body),
   });
   const payload = (await response.json()) as PaystackResponse;
-  if (!response.ok || !payload.status || !payload.data?.reference) {
-    throw new Error(payload.message || "Paystack could not initialize the payment.");
+  if (!response.ok || !payload.status) {
+    throw new Error(payload.message || "Paystack could not process the payment request.");
+  }
+  return payload;
+}
+
+async function paystackGet(path: string) {
+  const secret = env("PAYSTACK_SECRET_KEY");
+  if (!secret) throw new Error("Paystack is not configured yet. Add PAYSTACK_SECRET_KEY on the server.");
+  const response = await fetch(`https://api.paystack.co${path}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${secret}` },
+  });
+  const payload = (await response.json()) as PaystackResponse;
+  if (!response.ok || !payload.status) {
+    throw new Error(payload.message || "Paystack could not verify the payment.");
   }
   return payload;
 }
@@ -100,7 +118,9 @@ export const initializePaystackPayment = createServerFn({ method: "POST" })
       });
     }
 
-    const providerReference = payload.data!.reference!;
+    const providerReference = payload.data?.reference;
+    if (!providerReference) throw new Error("Paystack did not return a payment reference.");
+
     const { error: updateError } = await db
       .from("payments")
       .update({ provider: "paystack", provider_transaction_id: providerReference, status: "pending" })
@@ -114,4 +134,45 @@ export const initializePaystackPayment = createServerFn({ method: "POST" })
       status: payload.data?.status ?? "pending",
       displayText: payload.data?.display_text ?? null,
     };
+  });
+
+export const verifyPaystackPayment = createServerFn({ method: "GET" })
+  .validator((data: unknown) => verifySchema.parse(data))
+  .handler(async ({ data }) => {
+    const db = adminSupabase();
+    const { data: payment, error: paymentError } = await db
+      .from("payments")
+      .select("id,order_id,amount,status")
+      .eq("provider", "paystack")
+      .eq("provider_transaction_id", data.reference)
+      .maybeSingle();
+    if (paymentError || !payment) throw new Error("We could not find this payment record.");
+
+    const payload = await paystackGet(`/transaction/verify/${encodeURIComponent(data.reference)}`);
+    const provider = payload.data;
+    const expectedAmount = Math.round(Number(payment.amount ?? 0)) * 100;
+    const amountMatches = Number(provider?.amount) === expectedAmount;
+    const currencyMatches = provider?.currency === "KES";
+    const status = provider?.status;
+
+    if (!amountMatches || !currencyMatches) {
+      throw new Error("The payment details could not be verified.");
+    }
+
+    if (status === "success") {
+      const { error } = await db
+        .from("payments")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", payment.id);
+      if (error) throw new Error("Payment was verified but the order could not be updated.");
+      await db.from("orders").update({ status: "processing" }).eq("id", payment.order_id);
+      return { status: "paid" as const, reference: data.reference };
+    }
+
+    if (status === "failed" || status === "abandoned") {
+      await db.from("payments").update({ status: "failed" }).eq("id", payment.id);
+      return { status: "failed" as const, reference: data.reference };
+    }
+
+    return { status: "pending" as const, reference: data.reference };
   });
