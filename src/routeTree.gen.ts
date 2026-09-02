@@ -15,6 +15,7 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as PaystackWebhookRouteImport } from './routes/api/paystack-webhook'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
@@ -36,6 +37,7 @@ const FaqRoute = FaqRouteImport.update({ id: '/faq', path: '/faq', getParentRout
 const OrderConfirmedRoute = OrderConfirmedRouteImport.update({ id: '/order-confirmed', path: '/order-confirmed', getParentRoute: () => rootRouteImport } as any)
 const SearchRoute = SearchRouteImport.update({ id: '/search', path: '/search', getParentRoute: () => rootRouteImport } as any)
 const ShopRoute = ShopRouteImport.update({ id: '/shop', path: '/shop', getParentRoute: () => rootRouteImport } as any)
+const PaystackWebhookRoute = PaystackWebhookRouteImport.update({ id: '/api/paystack-webhook', path: '/api/paystack-webhook', getParentRoute: () => rootRouteImport } as any)
 const CategoryCategoryRoute = CategoryCategoryRouteImport.update({ id: '/category/$category', path: '/category/$category', getParentRoute: () => rootRouteImport } as any)
 const PoliciesPolicyRoute = PoliciesPolicyRouteImport.update({ id: '/policies/$policy', path: '/policies/$policy', getParentRoute: () => rootRouteImport } as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({ id: '/product/$slug', path: '/product/$slug', getParentRoute: () => rootRouteImport } as any)
@@ -69,13 +71,13 @@ const rootRouteChildren = {
   OrderConfirmedRoute,
   SearchRoute,
   ShopRoute,
+  PaystackWebhookRoute,
   CategoryCategoryRoute,
   PoliciesPolicyRoute,
   ProductSlugRoute,
 }
 
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)
 
 import type { getRouter } from './router.tsx'
 import type { startInstance } from './start.ts'
