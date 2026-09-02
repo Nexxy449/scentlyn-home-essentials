@@ -12,9 +12,7 @@ export const Route = createFileRoute("/shop")({
       { property: "og:title", content: "Shop Home Essentials — Scentlyn" },
       { property: "og:description", content: "Laundry, cleaning and home fragrance essentials for a fresher home." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://scentlyn-home-essentials.lovable.app/shop" },
     ],
-    links: [{ rel: "canonical", href: "https://scentlyn-home-essentials.lovable.app/shop" }],
   }),
   component: ShopPage,
 });
