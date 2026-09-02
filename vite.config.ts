@@ -1,13 +1,13 @@
 // @lovable.dev/vite-tanstack-config provides the TanStack Start/Vite integration.
-// The project is deployed to Vercel, so Nitro must explicitly target Vercel
-// instead of the wrapper's default Cloudflare target.
+// The deployment target is configured on TanStack Start's server so Nitro emits
+// a Vercel-compatible server bundle.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  nitro: {
-    preset: "vercel",
-  },
   tanstackStart: {
-    server: { entry: "server" },
+    server: {
+      entry: "server",
+      preset: "vercel",
+    },
   },
 });
