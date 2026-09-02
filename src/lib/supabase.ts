@@ -1,13 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+function readEnvironment(name: string): string | undefined {
+  const viteValue = import.meta.env[name];
+  if (viteValue) return viteValue;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables");
+  // Route loaders run on the server, where deployment configuration is exposed
+  // through process.env rather than Vite's client-side replacement.
+  return typeof process !== "undefined" ? process.env[name] : undefined;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+const supabaseUrl = readEnvironment("VITE_SUPABASE_URL") ?? readEnvironment("SUPABASE_URL");
+const supabasePublishableKey =
+  readEnvironment("VITE_SUPABASE_PUBLISHABLE_KEY") ??
+  readEnvironment("VITE_SUPABASE_ANON_KEY") ??
+  readEnvironment("SUPABASE_PUBLISHABLE_KEY");
+
+if (!supabaseUrl || !supabasePublishableKey) {
+  throw new Error(
+    "Missing Supabase configuration. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.",
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
