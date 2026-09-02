@@ -18,10 +18,16 @@ export const Route = createFileRoute("/api/paystack-webhook")({
           return new Response("Invalid signature", { status: 401 });
         }
 
-        const event = JSON.parse(raw) as {
+        let event: {
           event?: string;
-          data?: { reference?: string; status?: string; amount?: number; metadata?: { order_number?: string } };
+          data?: { reference?: string; status?: string; amount?: number; currency?: string };
         };
+        try {
+          event = JSON.parse(raw) as typeof event;
+        } catch {
+          return new Response("Invalid payload", { status: 400 });
+        }
+
         const reference = event.data?.reference;
         if (!reference) return new Response("ok", { status: 200 });
 
@@ -30,25 +36,34 @@ export const Route = createFileRoute("/api/paystack-webhook")({
         if (!url || !serviceKey) return new Response("Server configuration error", { status: 500 });
         const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
-        const { data: payment } = await db
+        const { data: payment, error: lookupError } = await db
           .from("payments")
           .select("id,order_id,amount,status")
           .eq("provider", "paystack")
           .eq("provider_transaction_id", reference)
           .maybeSingle();
+        if (lookupError) return new Response("Database lookup failed", { status: 500 });
         if (!payment) return new Response("ok", { status: 200 });
 
-        if (event.event === "charge.success" || event.event === "charge.failed" || event.event === "transaction.failed") {
-          const nextStatus = event.event === "charge.success" ? "paid" : "failed";
-          const paidAt = nextStatus === "paid" ? new Date().toISOString() : null;
-          const { error } = await db
-            .from("payments")
-            .update({ status: nextStatus, paid_at: paidAt })
-            .eq("id", payment.id);
-          if (error) return new Response("Database update failed", { status: 500 });
-
-          if (nextStatus === "paid") {
+        if (event.event === "charge.success" || event.event === "transaction.success") {
+          const expectedAmount = Math.round(Number(payment.amount ?? 0)) * 100;
+          if (Number(event.data?.amount) !== expectedAmount || event.data?.currency !== "KES") {
+            return new Response("Payment details mismatch", { status: 400 });
+          }
+          if (payment.status !== "paid") {
+            const { error } = await db
+              .from("payments")
+              .update({ status: "paid", paid_at: new Date().toISOString() })
+              .eq("id", payment.id);
+            if (error) return new Response("Database update failed", { status: 500 });
             await db.from("orders").update({ status: "processing" }).eq("id", payment.order_id);
+          }
+        }
+
+        if (event.event === "charge.failed" || event.event === "transaction.failed") {
+          if (payment.status !== "paid") {
+            const { error } = await db.from("payments").update({ status: "failed" }).eq("id", payment.id);
+            if (error) return new Response("Database update failed", { status: 500 });
           }
         }
 
