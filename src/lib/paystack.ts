@@ -3,13 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 const inputSchema = z.object({
-  orderNumber: z.string().min(1),
-  email: z.string().email(),
-  phone: z.string().min(9),
+  orderNumber: z.string().min(1).max(100),
+  email: z.string().email().max(254),
+  phone: z.string().min(9).max(20),
   method: z.enum(["mpesa", "card"]),
 });
 
-const verifySchema = z.object({ reference: z.string().min(1) });
+const verifySchema = z.object({ reference: z.string().min(1).max(200) });
 
 type PaystackResponse = {
   status?: boolean;
@@ -78,21 +78,27 @@ export const initializePaystackPayment = createServerFn({ method: "POST" })
     const db = adminSupabase();
     const { data: order, error: orderError } = await db
       .from("orders")
-      .select("id,order_number,total")
+      .select("id,order_number,total,status")
       .eq("order_number", data.orderNumber)
       .maybeSingle();
     if (orderError || !order) throw new Error("We could not find the order to start payment.");
+    if (order.status !== "pending") throw new Error("This order is no longer awaiting payment.");
 
     const amount = Math.round(Number(order.total ?? 0));
     if (!Number.isFinite(amount) || amount <= 0) throw new Error("The order total is invalid.");
 
     const { data: payment, error: paymentError } = await db
       .from("payments")
-      .select("id,method,status")
+      .select("id,method,status,amount,provider_transaction_id")
       .eq("order_id", order.id)
       .eq("method", data.method)
       .maybeSingle();
     if (paymentError || !payment) throw new Error("The payment record for this order is unavailable.");
+    if (Math.round(Number(payment.amount ?? 0)) !== amount) throw new Error("The payment amount does not match the order total.");
+    if (payment.status === "paid") return { method: data.method, reference: payment.provider_transaction_id, authorizationUrl: null, status: "success", displayText: null };
+    if (payment.provider_transaction_id && payment.status === "pending") {
+      return { method: data.method, reference: payment.provider_transaction_id, authorizationUrl: null, status: "pending", displayText: null };
+    }
 
     const reference = `${data.orderNumber}-${Date.now()}`;
     let payload: PaystackResponse;
@@ -124,7 +130,8 @@ export const initializePaystackPayment = createServerFn({ method: "POST" })
     const { error: updateError } = await db
       .from("payments")
       .update({ provider: "paystack", provider_transaction_id: providerReference, status: "pending" })
-      .eq("id", payment.id);
+      .eq("id", payment.id)
+      .eq("status", "pending");
     if (updateError) throw new Error("Payment started but the order payment record could not be updated.");
 
     return {
@@ -160,17 +167,16 @@ export const verifyPaystackPayment = createServerFn({ method: "GET" })
     }
 
     if (status === "success") {
-      const { error } = await db
-        .from("payments")
-        .update({ status: "paid", paid_at: new Date().toISOString() })
-        .eq("id", payment.id);
-      if (error) throw new Error("Payment was verified but the order could not be updated.");
-      await db.from("orders").update({ status: "processing" }).eq("id", payment.order_id);
-      return { status: "paid" as const, reference: data.reference };
+      const { data: finalized, error } = await db.rpc("finalize_paystack_payment", { p_reference: data.reference });
+      if (error || !finalized?.length) throw new Error("Payment was verified but could not be finalized safely.");
+      return { status: finalized[0].payment_status === "paid" ? "paid" as const : "pending" as const, reference: data.reference };
     }
 
     if (status === "failed" || status === "abandoned") {
-      await db.from("payments").update({ status: "failed" }).eq("id", payment.id);
+      if (payment.status !== "paid") {
+        const { error } = await db.from("payments").update({ status: "failed", updated_at: new Date().toISOString() }).eq("id", payment.id).neq("status", "paid");
+        if (error) throw new Error("The failed payment could not be recorded.");
+      }
       return { status: "failed" as const, reference: data.reference };
     }
 
