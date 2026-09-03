@@ -50,19 +50,18 @@ export const Route = createFileRoute("/api/paystack-webhook")({
           if (Number(event.data?.amount) !== expectedAmount || event.data?.currency !== "KES") {
             return new Response("Payment details mismatch", { status: 400 });
           }
-          if (payment.status !== "paid") {
-            const { error } = await db
-              .from("payments")
-              .update({ status: "paid", paid_at: new Date().toISOString() })
-              .eq("id", payment.id);
-            if (error) return new Response("Database update failed", { status: 500 });
-            await db.from("orders").update({ status: "processing" }).eq("id", payment.order_id);
-          }
+
+          const { error } = await db.rpc("finalize_paystack_payment", { p_reference: reference });
+          if (error) return new Response("Payment could not be finalized safely", { status: 500 });
         }
 
         if (event.event === "charge.failed" || event.event === "transaction.failed") {
           if (payment.status !== "paid") {
-            const { error } = await db.from("payments").update({ status: "failed" }).eq("id", payment.id);
+            const { error } = await db
+              .from("payments")
+              .update({ status: "failed", updated_at: new Date().toISOString() })
+              .eq("id", payment.id)
+              .neq("status", "paid");
             if (error) return new Response("Database update failed", { status: 500 });
           }
         }
