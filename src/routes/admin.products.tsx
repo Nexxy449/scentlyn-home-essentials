@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ImagePlus, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,8 +21,7 @@ const extensionFor = (file: File) => file.name.split(".").pop()?.toLowerCase().r
 async function uploadImage(file: File, path: string) {
   const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true, cacheControl: "31536000", contentType: file.type || undefined });
   if (error) throw error;
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-  return data.publicUrl;
+  return supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl;
 }
 
 function ImagePicker({ value, onChange, label }: { value: string; onChange: (file: File | null) => void; label: string }) {
@@ -49,13 +48,12 @@ function AdminProducts() {
     try {
       if (!editing.name.trim() || !editing.slug.trim()) throw new Error("Product name and slug are required.");
       if (editing.variants.some((v) => !v.name.trim() || Number(v.price) < 0 || Number(v.stock_quantity) < 0)) throw new Error("Each variant needs a name and valid non-negative price and stock.");
-      const row = { category_id: editing.category_id || null, name: editing.name.trim(), slug: editing.slug.trim(), brand: editing.brand.trim() || null, description: editing.description.trim() || null, image_url: editing.image_url.trim() || null, featured: editing.featured, active: editing.active };
+      const row = { category_id: editing.category_id || null, name: editing.name.trim(), slug: editing.slug.trim(), brand: editing.brand.trim() || null, description: editing.description.trim() || null, image_url: editing.imageFile ? null : (editing.image_url.trim() || null), featured: editing.featured, active: editing.active };
       let id = editing.id;
       if (id) { const r = await supabase.from("products").update(row).eq("id", id); if (r.error) throw r.error; }
       else { const r = await supabase.from("products").insert(row).select("id").single(); if (r.error || !r.data) throw new Error(r.error?.message || "Unable to create product."); id = r.data.id; }
       if (editing.imageFile && id) {
-        const path = `products/${id}/main-${Date.now()}.${extensionFor(editing.imageFile)}`;
-        const url = await uploadImage(editing.imageFile, path);
+        const url = await uploadImage(editing.imageFile, `products/${id}/main-${Date.now()}.${extensionFor(editing.imageFile)}`);
         const r = await supabase.from("products").update({ image_url: url }).eq("id", id); if (r.error) throw r.error;
       }
       for (const v of editing.variants) {
@@ -64,8 +62,7 @@ function AdminProducts() {
         if (variantId) { const r = await supabase.from("product_variants").update(vr).eq("id", variantId); if (r.error) throw r.error; }
         else { const r = await supabase.from("product_variants").insert(vr).select("id").single(); if (r.error || !r.data) throw new Error(r.error?.message || "Unable to create variant."); variantId = r.data.id; }
         if (v.imageFile && variantId) {
-          const path = `products/${id}/variants/${variantId}-${Date.now()}.${extensionFor(v.imageFile)}`;
-          const url = await uploadImage(v.imageFile, path);
+          const url = await uploadImage(v.imageFile, `products/${id}/variants/${variantId}-${Date.now()}.${extensionFor(v.imageFile)}`);
           const r = await supabase.from("product_variants").update({ image_url: url }).eq("id", variantId); if (r.error) throw r.error;
         }
       }
