@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Check, MessageCircle, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
+import { Check, ChevronRight, MessageCircle, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/product/$slug")({
     const catalogue = await getCatalogue();
     const product = catalogue.products.find((p) => p.slug === params.slug);
     if (!product) throw notFound();
-    return { product, category: catalogue.categories.find((c) => c.slug === product.category) ?? null, related: catalogue.products.filter((p) => p.slug !== product.slug && p.category === product.category).slice(0, 3) };
+    return { product, category: catalogue.categories.find((c) => c.slug === product.category) ?? null, related: catalogue.products.filter((p) => p.slug !== product.slug && p.category === product.category).slice(0, 4) };
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Product unavailable — Scentlyn" }, { name: "robots", content: "noindex" }] };
@@ -30,26 +31,76 @@ function ProductPage() {
   const [variantIndex, setVariantIndex] = useState(firstAvailable === -1 ? 0 : firstAvailable);
   const [qty, setQty] = useState(1);
   const variant = product.variants[variantIndex];
-  const variantImage = (variant as typeof variant & { image?: string } | undefined)?.image;
-  const selectedImage = variantImage || product.image;
+  const selectedImage = (variant as typeof variant & { image?: string } | undefined)?.image || product.image;
   if (!variant || !category) return null;
+
   const waMessage = `Hi Scentlyn, I'd like to enquire about ${product.name} – ${variant.label}. Is it available?`;
-  return <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-    <nav className="text-xs text-muted-foreground"><Link to="/" className="hover:text-foreground">Home</Link>{" "}/{" "}<Link to="/category/$category" params={{ category: category.slug }} className="hover:text-foreground">{category.name}</Link>{" "}/ <span className="text-foreground">{subcategoryName(product.category, product.subcategory)}</span></nav>
-    <div className="mt-4 grid gap-8 md:grid-cols-2">
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface"><img src={selectedImage} alt={`${product.name} — ${variant.label}`} className="aspect-square w-full object-cover transition-opacity duration-300" /></div>
-      <div>
-        {product.brand && <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{product.brand}</span>}
-        <h1 className="mt-1 text-3xl font-extrabold md:text-4xl">{product.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{product.short}</p>
-        <p className="mt-5 font-display text-3xl font-bold text-brand">{formatPrice(variant.price)}</p>
-        <p className="mt-1 text-sm">{variant.inStock ? <span className="inline-flex items-center gap-1 text-fresh-foreground"><Check className="h-4 w-4 text-primary" /> In stock — {variant.label}</span> : <span className="text-muted-foreground">Out of stock — {variant.label}</span>}</p>
-        <div className="mt-6"><h2 className="text-sm font-semibold uppercase tracking-wide">{product.variantLabel}</h2><div className="mt-2 flex flex-wrap gap-2">{product.variants.map((v, i) => <button key={v.label} type="button" onClick={() => setVariantIndex(i)} disabled={!v.inStock} className={`rounded-xl border px-4 py-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${i === variantIndex ? "border-primary bg-accent text-accent-foreground" : "border-border bg-background hover:bg-secondary"}`}>{v.label}</button>)}</div></div>
-        <div className="mt-6 flex items-center gap-4"><span className="text-sm font-semibold uppercase tracking-wide">Quantity</span><div className="flex items-center rounded-xl border border-border"><button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex h-11 w-11 items-center justify-center"><Minus className="h-4 w-4" /></button><span className="w-10 text-center font-semibold">{qty}</span><button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)} className="flex h-11 w-11 items-center justify-center"><Plus className="h-4 w-4" /></button></div></div>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row"><Button variant="brand" size="xl" className="flex-1" disabled={!variant.inStock} onClick={() => { add({ productSlug: product.slug, name: product.name, variant: variant.label, unitPrice: variant.price, quantity: qty, image: selectedImage }); toast.success(`${product.name} – ${variant.label} added to cart`); }}>Add to cart</Button><Button asChild variant="whatsapp" size="xl" className="flex-1"><a href={waLink(waMessage)} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" /> Order via WhatsApp</a></Button></div>
-        <div className="mt-8 space-y-4 rounded-2xl border border-border p-5"><div><h3 className="text-sm font-semibold uppercase tracking-wide">Product details</h3><p className="mt-2 text-sm text-muted-foreground">{product.description}</p><ul className="mt-3 space-y-1">{product.benefits.map((b) => <li key={b} className="flex items-start gap-2 text-sm text-muted-foreground"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {b}</li>)}</ul></div><div className="border-t border-border pt-4 text-sm text-muted-foreground"><p className="flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Nairobi delivery from KSh 250 · countrywide courier available</p><p className="mt-2 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Genuine products, sealed packaging</p></div></div>
+
+  return (
+    <div className="bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <nav className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-foreground">Home</Link><ChevronRight className="h-3 w-3" />
+          <Link to="/category/$category" params={{ category: category.slug }} className="hover:text-foreground">{category.name}</Link><ChevronRight className="h-3 w-3" />
+          <span className="max-w-[180px] truncate text-foreground">{product.name}</span>
+        </nav>
+
+        <div className="mt-6 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-surface">
+              <img src={selectedImage} alt={`${product.name} — ${variant.label}`} className="aspect-square w-full object-cover transition-opacity duration-300" />
+              {product.brand === "Scentlyn" && <span className="absolute left-4 top-4 rounded-full bg-background/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand backdrop-blur">Scentlyn</span>}
+            </div>
+            <p className="mt-3 text-center text-xs text-muted-foreground">Selected option: {variant.label}</p>
+          </div>
+
+          <div className="py-1 lg:py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">{product.brand || subcategoryName(product.category, product.subcategory)}</p>
+            <h1 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">{product.name}</h1>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">{product.short}</p>
+
+            <div className="mt-6 flex flex-wrap items-end gap-x-4 gap-y-2 border-b border-border/60 pb-6">
+              <span className="font-display text-3xl font-bold text-brand">{formatPrice(variant.price)}</span>
+              {variant.compareAtPrice && variant.compareAtPrice > variant.price && <span className="text-sm text-muted-foreground line-through">{formatPrice(variant.compareAtPrice)}</span>}
+              <span className={`text-sm ${variant.inStock ? "text-primary" : "text-muted-foreground"}`}>{variant.inStock ? "In stock" : "Currently unavailable"}</span>
+            </div>
+
+            <div className="mt-7">
+              <div className="flex items-center justify-between gap-4"><h2 className="text-sm font-semibold">{product.variantLabel}</h2><span className="text-xs text-muted-foreground">{product.variants.length} options</span></div>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {product.variants.map((v, i) => (
+                  <button key={v.label} type="button" onClick={() => setVariantIndex(i)} disabled={!v.inStock} className={`min-h-12 rounded-xl border px-3 py-2 text-left text-sm font-medium transition-all ${i === variantIndex ? "border-primary bg-accent text-accent-foreground ring-1 ring-primary" : "border-border bg-background hover:bg-secondary"} disabled:cursor-not-allowed disabled:opacity-40`}>
+                    <span className="block truncate">{v.label}</span><span className="mt-0.5 block text-xs font-normal opacity-70">{formatPrice(v.price)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div><label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em]">Quantity</label><div className="flex h-12 items-center rounded-xl border border-border"><button type="button" aria-label="Decrease quantity" onClick={() => setQty((q) => Math.max(1, q - 1))} className="flex h-full w-12 items-center justify-center hover:bg-secondary"><Minus className="h-4 w-4" /></button><span className="w-10 text-center text-sm font-semibold">{qty}</span><button type="button" aria-label="Increase quantity" onClick={() => setQty((q) => q + 1)} className="flex h-full w-12 items-center justify-center hover:bg-secondary"><Plus className="h-4 w-4" /></button></div></div>
+              <Button variant="brand" size="xl" className="flex-1" disabled={!variant.inStock} onClick={() => { add({ productSlug: product.slug, name: product.name, variant: variant.label, unitPrice: variant.price, quantity: qty, image: selectedImage }); toast.success(`${product.name} added to cart`, { description: variant.label }); }}>Add to basket</Button>
+            </div>
+            <Button asChild variant="whatsapp" size="xl" className="mt-3 w-full"><a href={waLink(waMessage)} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" /> Ask about this product on WhatsApp</a></Button>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <InfoItem icon={<Truck className="h-4 w-4" />} title="Delivery across Kenya" text="Nairobi delivery from KSh 250 · countrywide courier available." />
+              <InfoItem icon={<ShieldCheck className="h-4 w-4" />} title="Shop with confidence" text="Genuine products and sealed packaging." />
+            </div>
+
+            <div className="mt-8 border-t border-border/60 pt-7">
+              <h2 className="font-display text-xl font-bold">About this product</h2>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{product.description}</p>
+              {product.benefits.length > 0 && <ul className="mt-5 space-y-3">{product.benefits.map((benefit) => <li key={benefit} className="flex gap-3 text-sm text-muted-foreground"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{benefit}</li>)}</ul>}
+            </div>
+          </div>
+        </div>
+
+        {related.length > 0 && <section className="mt-16 border-t border-border/60 pt-12"><div className="flex items-end justify-between gap-4"><div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">Keep exploring</p><h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">You may also like</h2></div><Link to="/category/$category" params={{ category: category.slug }} className="hidden text-sm font-semibold text-brand hover:underline sm:block">Shop {category.name}</Link></div><div className="mt-7 grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">{related.map((p) => <ProductCard key={p.slug} product={p} />)}</div></section>}
       </div>
     </div>
-    {related.length > 0 && <section className="mt-14"><h2 className="text-2xl font-bold">You may also like</h2><div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-5">{related.map((p) => <ProductCard key={p.slug} product={p} />)}</div></section>}
-  </div>;
+  );
+}
+
+function InfoItem({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return <div className="rounded-2xl border border-border/70 bg-surface/50 p-4"><div className="flex items-center gap-2 text-sm font-semibold"><span className="text-primary">{icon}</span>{title}</div><p className="mt-1.5 text-xs leading-5 text-muted-foreground">{text}</p></div>;
 }
