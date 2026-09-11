@@ -171,12 +171,38 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 }
 
 @utility bg-gradient-fresh {
   background-image: var(--gradient-fresh);
+}
+
+@utility bg-gradient-ivory {
+  background-image: var(--gradient-ivory-mobile);
+}
+
+@utility md-bg-gradient-ivory {
+  @media (min-width: 768px) {
+    background-image: var(--gradient-ivory);
+  }
+}
+
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+@utility gold-rule {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  background-color: var(--color-gold);
 }
 
 @utility bg-gradient-soft {
