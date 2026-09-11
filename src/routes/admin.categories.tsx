@@ -15,7 +15,6 @@ const categoryPresentation: Record<string, { name: string; description: string; 
   kitchen: { name: "Kitchen", description: "Degreasers, dishwashing & surfaces", order: 2 },
   bathroom: { name: "Toiletries", description: "Bathroom cleaners, toilet care & freshness", order: 3 },
   scents: { name: "Fragrance", description: "Candles, diffusers & beautiful scents", order: 4 },
-  "home-care": { name: "Home Care", description: "Everyday cleaners for the whole home", order: 5 },
 };
 
 function AdminCategories() {
@@ -34,10 +33,7 @@ function AdminCategories() {
       if (cancelled) return;
       const failure = c.error || p.error;
       if (failure) setError(failure.message || "Unable to load categories.");
-      else {
-        setCategories((c.data ?? []) as CategoryRow[]);
-        setProducts((p.data ?? []) as ProductRow[]);
-      }
+      else { setCategories((c.data ?? []) as CategoryRow[]); setProducts((p.data ?? []) as ProductRow[]); }
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -54,7 +50,7 @@ function AdminCategories() {
       productCount: linkedProducts.length,
       activeProductCount: linkedProducts.filter((product) => product.active).length,
     };
-  }).sort((a, b) => a.displayOrder - b.displayOrder), [categories, products]);
+  }).filter((category) => Boolean(categoryPresentation[category.slug])).sort((a, b) => a.displayOrder - b.displayOrder), [categories, products]);
 
   const filtered = rows.filter((category) => {
     const q = query.trim().toLowerCase();
@@ -69,7 +65,7 @@ function AdminCategories() {
     </div>
     <Card>
       <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><CardTitle>Current catalogue categories</CardTitle><CardDescription>{loading ? "Loading categories…" : `${filtered.length} of ${categories.length} categories`}</CardDescription></div>
+        <div><CardTitle>Current catalogue categories</CardTitle><CardDescription>{loading ? "Loading categories…" : `${filtered.length} of ${rows.length} categories`}</CardDescription></div>
         <div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search categories" className="pl-9" aria-label="Search categories"/></div>
       </CardHeader>
       <CardContent>
