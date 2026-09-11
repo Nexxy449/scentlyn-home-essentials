@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
-import logoUrl from "@/assets/logo.jpg";
+import { Wordmark } from "@/components/wordmark";
 import { business, categories, waLink } from "@/lib/shop-data";
 import { policyLinks } from "@/lib/site-content";
 
@@ -10,16 +10,12 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border bg-surface">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
-          <Link to="/" className="inline-block">
-            <img
-              src={logoUrl}
-              alt="Scentlyn Home Essentials"
-              loading="lazy"
-              className="h-11 w-auto max-w-[180px] object-contain"
-            />
+          <Link to="/" className="inline-block" aria-label="Scentlyn home">
+            <Wordmark className="text-[2rem] sm:text-[2rem]" />
           </Link>
-          <p className="mt-4 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Scent. Freshness. Home Care.
+          <span aria-hidden className="gold-rule mt-4" />
+          <p className="mt-4 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            Scent · Freshness · Home Care
           </p>
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
             Everything you need to keep your home clean, fresh and beautifully cared for.

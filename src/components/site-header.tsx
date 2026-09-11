@@ -3,7 +3,7 @@ import { ChevronDown, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import logoUrl from "@/assets/logo.jpg";
+import { Wordmark } from "@/components/wordmark";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { categories, formatPrice, fromPrice, searchProducts } from "@/lib/shop-data";
@@ -20,11 +20,19 @@ export function SiteHeader() {
   const { count } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 backdrop-blur-md">
-      <p className="bg-brand py-2 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-brand-foreground">
-        Scent • Freshness • Home Care
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
+      <p className="border-b border-border/70 py-2.5 text-center text-[10px] font-medium uppercase tracking-[0.3em] text-muted-foreground">
+        Delivery across Kenya
+        <span className="mx-2 text-gold" aria-hidden>
+          ·
+        </span>
+        100% original products
+        <span className="mx-2 hidden text-gold sm:inline" aria-hidden>
+          ·
+        </span>
+        <span className="hidden sm:inline">Secure payments</span>
       </p>
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:h-20 sm:px-6">
         <button
           type="button"
           aria-label="Open menu"
@@ -35,30 +43,21 @@ export function SiteHeader() {
         </button>
 
         <Link to="/" className="flex shrink-0 items-center" aria-label="Scentlyn home">
-          <img
-            src={logoUrl}
-            alt="Scentlyn Home Essentials"
-            width={360}
-            height={360}
-            fetchPriority="high"
-            decoding="async"
-            className="h-9 w-auto max-w-[132px] object-contain sm:h-11 sm:max-w-[170px]"
-          />
-
+          <Wordmark />
         </Link>
 
-        <nav className="mx-auto hidden items-center gap-1 md:flex" aria-label="Main">
+        <nav className="mx-auto hidden items-center gap-7 md:flex" aria-label="Main">
           <Link
             to="/shop"
-            className="rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            activeProps={{ className: "bg-secondary text-foreground" }}
+            className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+            activeProps={{ className: "text-foreground" }}
           >
             Shop
           </Link>
           <div className="group relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
               aria-haspopup="true"
             >
               Categories <ChevronDown className="h-3.5 w-3.5" />
@@ -81,8 +80,8 @@ export function SiteHeader() {
             <Link
               key={p.to}
               to={p.to}
-              className="rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              activeProps={{ className: "bg-secondary text-foreground" }}
+              className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+              activeProps={{ className: "text-foreground" }}
             >
               {p.label}
             </Link>
@@ -131,7 +130,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     <Portal>
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-background md:hidden">
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
-        <span className="font-display text-lg font-bold">Menu</span>
+        <Wordmark className="text-[1.5rem] sm:text-[1.5rem]" />
         <button
           type="button"
           aria-label="Close menu"
