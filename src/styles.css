@@ -16,8 +16,7 @@
   --primary: oklch(48% 0.15 245); --primary-foreground: oklch(99% 0.003 235); --brand: oklch(36% 0.14 245); --brand-foreground: oklch(99% 0.003 235);
   --fresh: oklch(91% 0.035 220); --fresh-foreground: oklch(31% 0.08 235); --secondary: oklch(94.5% 0.018 230); --secondary-foreground: oklch(30% 0.045 235); --muted: oklch(95.8% 0.01 230); --muted-foreground: oklch(48% 0.035 235); --accent: oklch(92% 0.045 225); --accent-foreground: oklch(30% 0.08 240);
   --destructive: oklch(52% 0.19 27); --destructive-foreground: oklch(98% 0.005 235); --whatsapp: oklch(58% 0.14 148); --whatsapp-foreground: oklch(99% 0.005 150); --border: oklch(89.5% 0.018 230); --input: oklch(89.5% 0.018 230); --ring: oklch(48% 0.15 245);
-  --sidebar: oklch(96.8% 0.012 230); --sidebar-foreground: oklch(23% 0.025 235); --sidebar-primary: oklch(48% 0.15 245); --sidebar-primary-foreground: oklch(99% 0.003 235); --sidebar-accent: oklch(92% 0.045 225); --sidebar-accent-foreground: oklch(30% 0.08 240); --sidebar-border: oklch(89.5% 0.018 230); --sidebar-ring: oklch(48% 0.15 245);
-  --shadow-card: 0 1px 2px oklch(35% 0.1 245 / 0.05), 0 12px 28px -20px oklch(35% 0.1 245 / 0.22); --shadow-lift: 0 22px 55px -28px oklch(35% 0.12 245 / 0.3);
+  --sidebar: oklch(96.8% 0.012 230); --sidebar-foreground: oklch(23% 0.025 235); --sidebar-primary: oklch(48% 0.15 245); --sidebar-primary-foreground: oklch(99% 0.003 235); --sidebar-accent: oklch(92% 0.045 225); --sidebar-accent-foreground: oklch(30% 0.08 240); --sidebar-border: oklch(89.5% 0.018 230); --sidebar-ring: oklch(48% 0.15 245); --shadow-card: 0 1px 2px oklch(35% 0.1 245 / 0.05), 0 12px 28px -20px oklch(35% 0.1 245 / 0.22); --shadow-lift: 0 22px 55px -28px oklch(35% 0.12 245 / 0.3);
 }
 .dark { --background: oklch(17% 0.035 240); --foreground: oklch(97% 0.008 225); --surface: oklch(21% 0.045 240); --card: oklch(21% 0.045 240); --card-foreground: oklch(97% 0.008 225); --popover: oklch(21% 0.045 240); --popover-foreground: oklch(97% 0.008 225); --primary: oklch(72% 0.13 230); --primary-foreground: oklch(17% 0.035 240); --brand: oklch(78% 0.11 230); --brand-foreground: oklch(17% 0.035 240); --fresh: oklch(68% 0.09 220); --fresh-foreground: oklch(96% 0.01 225); --secondary: oklch(26% 0.04 240); --secondary-foreground: oklch(97% 0.008 225); --muted: oklch(26% 0.04 240); --muted-foreground: oklch(73% 0.025 225); --accent: oklch(30% 0.06 230); --accent-foreground: oklch(97% 0.008 225); --destructive: oklch(70% 0.19 22); --destructive-foreground: oklch(98% 0.003 248); --whatsapp: oklch(68% 0.16 148); --whatsapp-foreground: oklch(15% 0.03 150); --border: oklch(100% 0 0 / 12%); --input: oklch(100% 0 0 / 15%); --ring: oklch(72% 0.13 230); }
 
@@ -43,4 +42,172 @@
 @keyframes scentlyn-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @utility animate-rise { animation: scentlyn-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+/* Scentlyn storefront styling direction — presentation only. */
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) {
+  --background: #fbf7f0;
+  --foreground: #18344a;
+  --surface: #f5eee4;
+  --card: #fffdf9;
+  --primary: #b8924f;
+  --primary-foreground: #fffdf9;
+  --brand: #0d344d;
+  --brand-foreground: #fffdf9;
+  --fresh: #e8eee8;
+  --fresh-foreground: #18344a;
+  --secondary: #efe6da;
+  --secondary-foreground: #18344a;
+  --muted: #f3ece3;
+  --muted-foreground: #65727b;
+  --accent: #efe3d5;
+  --accent-foreground: #18344a;
+  --border: #e5dbce;
+  --input: #e5dbce;
+  --ring: #b8924f;
+  --shadow-card: 0 10px 30px -22px rgba(24, 52, 74, .35);
+  --shadow-lift: 0 28px 65px -35px rgba(24, 52, 74, .35);
+}
+
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header {
+  border-color: rgba(229, 219, 206, .8);
+  background: rgba(255, 253, 249, .94);
+  box-shadow: 0 8px 28px -24px rgba(24, 52, 74, .35);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header > div:first-child {
+  background: #0d344d;
+  letter-spacing: .18em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header a[aria-label="Scentlyn Laundrymart home"] span:first-child,
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header .font-display {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: .055em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header a[aria-label="Scentlyn Laundrymart home"] span:last-child {
+  color: #b8924f;
+  letter-spacing: .28em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header nav a {
+  color: #53616b;
+  letter-spacing: .035em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header nav a:hover,
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) header nav a[data-status="active"] {
+  background: #efe6da;
+  color: #18344a;
+}
+
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type {
+  min-height: min(76vh, 760px);
+  display: flex;
+  align-items: stretch;
+  background: #efe7dc;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type > div {
+  min-height: inherit;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type > div:first-child {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: clamp(3rem, 8vw, 7rem) clamp(1.5rem, 7vw, 7rem);
+  background: linear-gradient(90deg, rgba(255,253,249,.96) 0%, rgba(255,253,249,.78) 42%, rgba(255,253,249,.08) 76%);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type > div:last-child {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type > div:last-child img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type h1 {
+  max-width: 720px;
+  color: #18344a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(3rem, 6vw, 6rem);
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type p {
+  color: #53616b;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type [class*="badge"],
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type p:has(+ h1) {
+  display: none;
+}
+
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section {
+  border-color: #e5dbce;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section h2 {
+  color: #18344a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section h3 {
+  color: #18344a;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main .rounded-2xl,
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main .rounded-3xl {
+  box-shadow: var(--shadow-card);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main a[class*="bg-primary"],
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main button[class*="bg-primary"] {
+  background: #0d344d;
+  color: #fffdf9;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main a[class*="bg-primary"]:hover,
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main button[class*="bg-primary"]:hover {
+  background: #183f59;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section:nth-of-type(2) > div {
+  background: transparent;
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section:nth-of-type(3) .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.75rem);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section:nth-of-type(3) a {
+  border: 1px solid #e5dbce;
+  background: #fffdf9;
+  box-shadow: 0 12px 35px -28px rgba(24, 52, 74, .35);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section:nth-of-type(3) a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 42px -28px rgba(24, 52, 74, .38);
+}
+body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) footer {
+  background: #0d344d;
+  color: #fffdf9;
+}
+
+@media (max-width: 767px) {
+  body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type {
+    min-height: 720px;
+  }
+  body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type > div:first-child {
+    align-items: flex-end;
+    padding: 2rem 1.25rem 4rem;
+    background: linear-gradient(180deg, rgba(255,253,249,.06) 15%, rgba(255,253,249,.35) 48%, rgba(255,253,249,.96) 82%);
+  }
+  body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main > section.relative.bg-surface:first-of-type h1 {
+    font-size: clamp(2.8rem, 13vw, 4.25rem);
+  }
+  body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main section:nth-of-type(3) .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
