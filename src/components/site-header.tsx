@@ -3,7 +3,7 @@ import { ChevronDown, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import logoUrl from "@/assets/logo.jpg";
+import { Wordmark } from "@/components/wordmark";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { categories, formatPrice, fromPrice, searchProducts } from "@/lib/shop-data";
