@@ -148,6 +148,10 @@
   --border: oklch(100% 0 0 / 12%);
   --input: oklch(100% 0 0 / 15%);
   --ring: oklch(72% 0.11 190);
+  --ink: oklch(14% 0.02 250);
+  --ink-foreground: oklch(97% 0.006 200);
+  --gold: oklch(78% 0.08 82);
+  --gold-foreground: oklch(17% 0.025 250);
 }
 
 @layer base {
