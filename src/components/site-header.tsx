@@ -80,8 +80,8 @@ export function SiteHeader() {
             <Link
               key={p.to}
               to={p.to}
-              className="rounded-full px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              activeProps={{ className: "bg-secondary text-foreground" }}
+              className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+              activeProps={{ className: "text-foreground" }}
             >
               {p.label}
             </Link>
@@ -130,7 +130,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
     <Portal>
     <div className="fixed inset-0 z-[60] overflow-y-auto bg-background md:hidden">
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
-        <span className="font-display text-lg font-bold">Menu</span>
+        <Wordmark className="text-[1.5rem] sm:text-[1.5rem]" />
         <button
           type="button"
           aria-label="Close menu"
