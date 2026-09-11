@@ -11,13 +11,16 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [resetting, setResetting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (loading) return;
+    if (loading || resetting) return;
 
     setError("");
+    setMessage("");
     setLoading(true);
 
     try {
@@ -31,9 +34,6 @@ function AdminLogin() {
         return;
       }
 
-      // Do not query profiles directly from the browser. This project does not
-      // grant authenticated users SELECT access to that table. Use the existing
-      // authorization RPC, which checks auth.uid() against the admin role.
       const { data: isAdmin, error: adminError } = await supabase.rpc("is_admin");
 
       if (adminError) {
@@ -58,6 +58,38 @@ function AdminLogin() {
     }
   }
 
+  async function handlePasswordReset() {
+    if (loading || resetting) return;
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) {
+      setError("Enter your admin email first, then choose Forgot password.");
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setResetting(true);
+
+    try {
+      const redirectTo = `${window.location.origin}/admin/reset-password`;
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo });
+
+      if (resetError) {
+        console.error("Admin password reset request failed:", resetError);
+        setError("Unable to send the reset email. Please check the email address and try again.");
+        return;
+      }
+
+      setMessage("If that email belongs to an administrator, a password reset link has been sent.");
+    } catch (unexpectedError) {
+      console.error("Admin password reset failed:", unexpectedError);
+      setError("Unable to send the reset email. Please try again.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
@@ -68,15 +100,19 @@ function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-medium">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Admin email" required className="w-full rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+            <label htmlFor="admin-email" className="mb-2 block text-sm font-medium">Email</label>
+            <input id="admin-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Admin email" required className="w-full rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" autoComplete="email" />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+            <label htmlFor="admin-password" className="mb-2 block text-sm font-medium">Password</label>
+            <input id="admin-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required className="w-full rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" autoComplete="current-password" />
+            <button type="button" onClick={() => void handlePasswordReset()} disabled={loading || resetting} className="mt-2 text-sm font-medium text-slate-600 underline-offset-4 hover:underline disabled:opacity-50">
+              {resetting ? "Sending reset link…" : "Forgot password?"}
+            </button>
           </div>
-          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-          <button type="submit" disabled={loading} className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white hover:bg-slate-800 disabled:opacity-50">
+          {error && <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {message && <div role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</div>}
+          <button type="submit" disabled={loading || resetting} className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white hover:bg-slate-800 disabled:opacity-50">
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
