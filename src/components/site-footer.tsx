@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
-import logoUrl from "@/assets/logo.jpg";
+import { Wordmark } from "@/components/wordmark";
 import { business, categories, waLink } from "@/lib/shop-data";
 import { policyLinks } from "@/lib/site-content";
 
