@@ -38,13 +38,22 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const categorySlugs = ["laundry", "kitchen", "bathroom", "scents"] as const;
+const categorySlugs = ["laundry", "home-care", "kitchen", "bathroom", "scents"] as const;
 
 const categoryCopy: Record<string, string> = {
   laundry: "Laundry essentials for softer fabrics and lasting freshness.",
+  "home-care": "Everyday cleaning essentials to keep your home fresh, clean and cared for.",
   kitchen: "Smart everyday care for sparkling surfaces and spotless dishes.",
   bathroom: "Cleaners and freshness for a bathroom that feels beautifully cared for.",
   scents: "Candles, diffusers and scents that make your space feel like home.",
+};
+
+const categoryLabels: Record<string, string> = {
+  laundry: "Laundry",
+  "home-care": "Home Care",
+  kitchen: "Kitchen",
+  bathroom: "Toiletries",
+  scents: "Fragrance",
 };
 
 function Home() {
@@ -121,16 +130,16 @@ function Home() {
           </div>
           <Link to="/shop" className="hidden items-center gap-1.5 text-sm font-semibold text-primary hover:underline sm:inline-flex">View all <ArrowRight className="h-4 w-4" /></Link>
         </Reveal>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {categoryCards.map((category, index) => category && (
             <Reveal key={category.slug} delay={index * 60}>
               <Link to="/category/$category" params={{ category: category.slug }} className="group relative block overflow-hidden rounded-[1.6rem] bg-surface">
                 <div className="aspect-[0.9] overflow-hidden">
-                  <img src={category.image} alt={category.name} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                  <img src={category.image} alt={categoryLabels[category.slug] ?? category.name} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 </div>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-5 pt-16 text-white">
                   <div className="flex items-end justify-between gap-3">
-                    <div><h3 className="font-display text-xl font-semibold">{category.name === "Bathroom" ? "Toiletries" : category.name}</h3><p className="mt-1 text-xs leading-relaxed text-white/80">{categoryCopy[category.slug]}</p></div>
+                    <div><h3 className="font-display text-xl font-semibold">{categoryLabels[category.slug] ?? category.name}</h3><p className="mt-1 text-xs leading-relaxed text-white/80">{categoryCopy[category.slug]}</p></div>
                     <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/50 transition group-hover:bg-white group-hover:text-foreground"><ArrowRight className="h-4 w-4" /></span>
                   </div>
                 </div>
