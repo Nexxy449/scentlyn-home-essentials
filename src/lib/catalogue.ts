@@ -17,6 +17,7 @@ function mapProduct(p: DbProduct, categorySlug: string, variants: DbVariant[]): 
   return { slug: p.slug, name: p.name, brand: p.brand ?? "", category: categorySlug, subcategory: m?.subcategory ?? "", short: p.description ?? m?.short ?? p.name, description: p.description ?? m?.description ?? "", image: p.image_url || m?.image || "", benefits: m?.benefits ?? [], variants: variants.filter((v) => v.active).map(mapVariant), variantLabel: m?.variantLabel ?? "Options", featured: p.featured, collections: m?.collections ?? [] };
 }
 function presentationCatalogue(): Catalogue { return { categories: presentationCategories, products: presentationProducts }; }
+function unavailableCatalogue(): Catalogue { return { categories: [], products: [] }; }
 
 export async function getCatalogue(): Promise<Catalogue> {
   if (!hasSupabaseConfig) return presentationCatalogue();
@@ -38,6 +39,6 @@ export async function getCatalogue(): Promise<Catalogue> {
     for (const v of variants) variantsByProduct.set(v.product_id, [...(variantsByProduct.get(v.product_id) ?? []), v]);
     const products = dbProducts.map((p) => { const slug = categorySlugById.get(p.category_id); return slug ? mapProduct(p, slug, variantsByProduct.get(p.id) ?? []) : null; }).filter((p): p is Product => p !== null);
     return { categories, products };
-  } catch (error) { console.error("Public catalogue query failed; using bundled catalogue.", error); return presentationCatalogue(); }
+  } catch (error) { console.error("Public catalogue query failed; hiding stale bundled catalogue.", error); return unavailableCatalogue(); }
 }
 export async function getProductCatalogueItem(slug: string) { const catalogue = await getCatalogue(); return { product: catalogue.products.find((p) => p.slug === slug) ?? null, catalogue }; }
