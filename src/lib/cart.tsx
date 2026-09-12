@@ -11,9 +11,9 @@ export type CartItem = {
 
 type CartContextValue = {
   items: CartItem[];
-  add: (item: CartItem) => void;
+  add: (item: CartItem, maxQuantity?: number) => void;
   remove: (productSlug: string, variant: string) => void;
-  setQuantity: (productSlug: string, variant: string, quantity: number) => void;
+  setQuantity: (productSlug: string, variant: string, quantity: number, maxQuantity?: number) => void;
   clear: () => void;
   count: number;
   subtotal: number;
@@ -21,22 +21,31 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "scentlyn-cart-v1";
+const MAX_CART_QUANTITY = 100;
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   useEffect(() => { try { const raw = window.localStorage.getItem(STORAGE_KEY); if (raw) setItems(JSON.parse(raw) as CartItem[]); } catch { /* ignore malformed local cart */ } }, []);
   useEffect(() => { try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore storage failures */ } }, [items]);
   const value = useMemo<CartContextValue>(() => {
-    const add = (item: CartItem) => setItems(prev => { const i=prev.findIndex(x=>x.productSlug===item.productSlug&&x.variant===item.variant); const existing=prev[i]; if(i===-1||!existing)return [...prev,item]; const next=[...prev]; next[i]={...existing,quantity:Math.min(100,existing.quantity+item.quantity)}; return next; });
-    const remove = (productSlug:string,variant:string) => setItems(prev=>prev.filter(x=>!(x.productSlug===productSlug&&x.variant===variant)));
-    const setQuantity = (productSlug:string,variant:string,quantity:number) => setItems(prev=>prev.map(x=>x.productSlug===productSlug&&x.variant===variant?{...x,quantity:Math.min(100,Math.max(0,quantity))}:x).filter(x=>x.quantity>0));
-    return {items,add,remove,setQuantity,clear:()=>setItems([]),count:items.reduce((n,i)=>n+i.quantity,0),subtotal:items.reduce((n,i)=>n+i.quantity*i.unitPrice,0)};
-  },[items]);
+    const add = (item: CartItem, maxQuantity = MAX_CART_QUANTITY) => setItems(prev => {
+      const i = prev.findIndex(x => x.productSlug === item.productSlug && x.variant === item.variant);
+      const existing = prev[i];
+      const limit = Math.min(MAX_CART_QUANTITY, Math.max(1, maxQuantity));
+      if (i === -1 || !existing) return [{ ...item, quantity: Math.min(item.quantity, limit) }, ...prev];
+      const next = [...prev];
+      next[i] = { ...existing, quantity: Math.min(limit, existing.quantity + item.quantity) };
+      return next;
+    });
+    const remove = (productSlug: string, variant: string) => setItems(prev => prev.filter(x => !(x.productSlug === productSlug && x.variant === variant)));
+    const setQuantity = (productSlug: string, variant: string, quantity: number, maxQuantity = MAX_CART_QUANTITY) => setItems(prev => prev.map(x => x.productSlug === productSlug && x.variant === variant ? { ...x, quantity: Math.min(MAX_CART_QUANTITY, Math.max(0, Math.min(quantity, Math.max(1, maxQuantity)))) } : x).filter(x => x.quantity > 0));
+    return { items, add, remove, setQuantity, clear: () => setItems([]), count: items.reduce((n, i) => n + i.quantity, 0), subtotal: items.reduce((n, i) => n + i.quantity * i.unitPrice, 0) };
+  }, [items]);
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
-export function useCart(){const ctx=useContext(CartContext);if(!ctx)throw new Error("useCart must be used inside CartProvider");return ctx;}
+export function useCart() { const ctx = useContext(CartContext); if (!ctx) throw new Error("useCart must be used inside CartProvider"); return ctx; }
 
-/** Production delivery choices. The database validates the selected fee server-side. */
+/** Fallback delivery choices used only until the live delivery zones load. */
 export const deliveryOptions = [
   { id: "nairobi-standard", name: "Nairobi Standard (1–2 days)", fee: 250 },
   { id: "nairobi-express", name: "Nairobi Same-Day Express", fee: 450 },
