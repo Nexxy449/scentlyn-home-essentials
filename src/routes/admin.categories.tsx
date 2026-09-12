@@ -5,167 +5,24 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/safe-image";
+import { categories as catalogueCategories } from "@/lib/shop-data";
 
 export const Route = createFileRoute("/admin/categories")({ component: AdminCategories });
 
-type CategoryRow = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  image_url: string | null;
-  sort_order: number;
-  active: boolean;
-};
-type ProductRow = { id: string; category_id: string | null; active: boolean };
-type Draft = Omit<CategoryRow, "id"> & { id?: string };
+type CategoryRow = { id:string; name:string; slug:string; description:string|null; image_url:string|null; sort_order:number; active:boolean };
+type ProductRow = { id:string; category_id:string|null; active:boolean };
+type Draft = Omit<CategoryRow,"id"> & { id?:string };
+const emptyDraft=():Draft=>({name:"",slug:"",description:"",image_url:"",sort_order:1,active:true});
 
-const emptyDraft = (): Draft => ({ name: "", slug: "", description: "", image_url: "", sort_order: 1, active: true });
-
-function AdminCategories() {
-  const [categories, setCategories] = useState<CategoryRow[]>([]);
-  const [products, setProducts] = useState<ProductRow[]>([]);
-  const [query, setQuery] = useState("");
-  const [editing, setEditing] = useState<Draft | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-
-  const load = async () => {
-    setLoading(true);
-    setError("");
-    const [{ data: c, error: ce }, { data: p, error: pe }] = await Promise.all([
-      supabase.from("categories").select("id,name,slug,description,image_url,sort_order,active").order("sort_order").order("name"),
-      supabase.from("products").select("id,category_id,active"),
-    ]);
-    if (ce || pe) setError((ce || pe)?.message || "Unable to load categories.");
-    else {
-      setCategories((c ?? []) as CategoryRow[]);
-      setProducts((p ?? []) as ProductRow[]);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { void load(); }, []);
-
-  const rows = useMemo(() => categories.map(category => {
-    const linked = products.filter(product => product.category_id === category.id);
-    return {
-      ...category,
-      productCount: linked.length,
-      activeProductCount: linked.filter(product => product.active).length,
-    };
-  }).filter(category => {
-    const q = query.trim().toLowerCase();
-    return !q || `${category.name} ${category.slug} ${category.description ?? ""}`.toLowerCase().includes(q);
-  }), [categories, products, query]);
-
-  const openNew = () => {
-    setError("");
-    setEditing({ ...emptyDraft(), sort_order: Math.max(0, ...categories.map(c => c.sort_order)) + 1 });
-  };
-
-  const openEdit = (category: CategoryRow) => {
-    setError("");
-    setEditing({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description ?? "",
-      image_url: category.image_url ?? "",
-      sort_order: category.sort_order,
-      active: category.active,
-    });
-  };
-
-  const save = async () => {
-    if (!editing || busy) return;
-    setBusy(true);
-    setError("");
-    try {
-      const name = editing.name.trim();
-      const slug = editing.slug.trim().toLowerCase();
-      const sortOrder = Number(editing.sort_order);
-      if (!name || !slug) throw new Error("Category name and slug are required.");
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error("Slug may contain lowercase letters, numbers and hyphens only.");
-      if (!Number.isInteger(sortOrder) || sortOrder < 0) throw new Error("Sort order must be a whole number of 0 or more.");
-
-      const payload = {
-        name,
-        slug,
-        description: editing.description.trim() || null,
-        image_url: editing.image_url.trim() || null,
-        sort_order: sortOrder,
-        active: editing.active,
-        updated_at: new Date().toISOString(),
-      };
-      const result = editing.id
-        ? await supabase.from("categories").update(payload).eq("id", editing.id).select("id").single()
-        : await supabase.from("categories").insert(payload).select("id").single();
-      if (result.error) throw result.error;
-      setEditing(null);
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to save category.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const toggle = async (category: CategoryRow) => {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    const { error: e } = await supabase.from("categories").update({ active: !category.active, updated_at: new Date().toISOString() }).eq("id", category.id);
-    if (e) setError(e.message);
-    else await load();
-    setBusy(false);
-  };
-
-  return <div className="space-y-6">
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">Catalogue</p>
-        <h2 className="mt-1 text-3xl font-semibold tracking-tight">Categories</h2>
-        <p className="mt-2 max-w-2xl text-muted-foreground">Manage the categories used by the storefront and product editor. Deactivation is used instead of deletion so existing products and order history remain safe.</p>
-      </div>
-      <Button onClick={openNew}><Plus className="mr-2 size-4" />Add category</Button>
-    </div>
-
-    {error && <p role="alert" className="rounded-lg border border-destructive/30 p-3 text-sm text-destructive">{error}</p>}
-
-    <Card>
-      <CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><CardTitle>Catalogue categories</CardTitle><CardDescription>{loading ? "Loading categories…" : `${rows.length} categories`}</CardDescription></div>
-        <div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground" /><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search categories" className="pl-9" aria-label="Search categories" /></div>
-      </CardHeader>
-      <CardContent>
-        {loading ? <p className="py-8 text-sm text-muted-foreground">Loading categories…</p> : rows.length === 0 ? <p className="py-8 text-sm text-muted-foreground">No categories found.</p> :
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{rows.map(category => <div key={category.id} className="overflow-hidden rounded-xl border bg-background">
-            <div className="aspect-[16/8] bg-muted">{category.image_url ? <img src={category.image_url} alt={category.name} className="h-full w-full object-cover" width="640" height="320" loading="lazy" /> : <div className="flex h-full items-center justify-center text-muted-foreground"><ImageOff className="size-6" /></div>}</div>
-            <div className="space-y-3 p-4">
-              <div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2 font-medium"><FolderTree className="size-4 text-muted-foreground" />{category.name}</div><span className="rounded-full border px-2 py-1 text-xs">{category.active ? "Active" : "Inactive"}</span></div>
-              <p className="min-h-10 text-sm text-muted-foreground">{category.description || "No description"}</p>
-              <div className="border-t pt-3 text-xs text-muted-foreground"><p>/{category.slug} · Order {category.sort_order}</p><p className="mt-1">{category.productCount} products · {category.activeProductCount} active</p></div>
-              <div className="flex gap-2 pt-1"><Button size="sm" variant="outline" onClick={() => openEdit(category)}><Pencil className="mr-1 size-4" />Edit</Button><Button size="sm" variant="outline" disabled={busy} onClick={() => void toggle(category)}>{category.active ? "Deactivate" : "Activate"}</Button></div>
-            </div>
-          </div>)}</div>}
-      </CardContent>
-    </Card>
-
-    {editing && <Card>
-      <CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle>{editing.id ? "Edit category" : "Add category"}</CardTitle><CardDescription>Keep slugs stable once products are live because storefront URLs may depend on them.</CardDescription></div><Button size="icon" variant="ghost" onClick={() => setEditing(null)} aria-label="Close category editor"><X className="size-4" /></Button></div></CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input aria-label="Category name" placeholder="Category name" value={editing.name} onChange={e => setEditing(d => d ? { ...d, name: e.target.value, slug: d.id ? d.slug : e.target.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") } : d)} />
-          <Input aria-label="Category slug" placeholder="Slug" value={editing.slug} onChange={e => setEditing(d => d ? { ...d, slug: e.target.value } : d)} />
-          <Input aria-label="Category description" placeholder="Description" value={editing.description ?? ""} onChange={e => setEditing(d => d ? { ...d, description: e.target.value } : d)} />
-          <Input aria-label="Category image URL" placeholder="Image URL (optional)" value={editing.image_url ?? ""} onChange={e => setEditing(d => d ? { ...d, image_url: e.target.value } : d)} />
-          <Input aria-label="Category sort order" type="number" min="0" step="1" placeholder="Sort order" value={editing.sort_order} onChange={e => setEditing(d => d ? { ...d, sort_order: Number(e.target.value) } : d)} />
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.active} onChange={e => setEditing(d => d ? { ...d, active: e.target.checked } : d)} /> Active in storefront</label>
-        </div>
-        <div className="flex gap-2"><Button disabled={busy} onClick={() => void save()}>{busy ? "Saving…" : "Save category"}</Button><Button variant="outline" disabled={busy} onClick={() => setEditing(null)}>Cancel</Button></div>
-      </CardContent>
-    </Card>}
-  </div>;
+function AdminCategories(){
+ const[categories,setCategories]=useState<CategoryRow[]>([]),[products,setProducts]=useState<ProductRow[]>([]),[query,setQuery]=useState(""),[editing,setEditing]=useState<Draft|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ const load=async()=>{setLoading(true);setError("");const[{data:c,error:ce},{data:p,error:pe}]=await Promise.all([supabase.from("categories").select("id,name,slug,description,image_url,sort_order,active").order("sort_order").order("name"),supabase.from("products").select("id,category_id,active")]);if(ce||pe)setError((ce||pe)?.message||"Unable to load categories.");else{setCategories((c??[])as CategoryRow[]);setProducts((p??[])as ProductRow[])}setLoading(false)};
+ useEffect(()=>{void load()},[]);
+ const rows=useMemo(()=>categories.map(category=>{const linked=products.filter(product=>product.category_id===category.id);return{...category,productCount:linked.length,activeProductCount:linked.filter(product=>product.active).length}}).filter(category=>{const q=query.trim().toLowerCase();return !q||`${category.name} ${category.slug} ${category.description??""}`.toLowerCase().includes(q)}),[categories,products,query]);
+ const openNew=()=>{setError("");setEditing({...emptyDraft(),sort_order:Math.max(0,...categories.map(c=>c.sort_order))+1})};
+ const openEdit=(category:CategoryRow)=>{setError("");setEditing({id:category.id,name:category.name,slug:category.slug,description:category.description??"",image_url:category.image_url??"",sort_order:category.sort_order,active:category.active})};
+ const save=async()=>{if(!editing||busy)return;setBusy(true);setError("");try{const name=editing.name.trim(),slug=editing.slug.trim().toLowerCase(),sortOrder=Number(editing.sort_order);if(!name||!slug)throw new Error("Category name and slug are required.");if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))throw new Error("Slug may contain lowercase letters, numbers and hyphens only.");if(!Number.isInteger(sortOrder)||sortOrder<0)throw new Error("Sort order must be a whole number of 0 or more.");const payload={name,slug,description:editing.description.trim()||null,image_url:editing.image_url.trim()||null,sort_order:sortOrder,active:editing.active,updated_at:new Date().toISOString()};const result=editing.id?await supabase.from("categories").update(payload).eq("id",editing.id).select("id").single():await supabase.from("categories").insert(payload).select("id").single();if(result.error)throw result.error;setEditing(null);await load()}catch(e){setError(e instanceof Error?e.message:"Unable to save category.")}finally{setBusy(false)}};
+ const toggle=async(category:CategoryRow)=>{if(busy)return;setBusy(true);setError("");const{error:e}=await supabase.from("categories").update({active:!category.active,updated_at:new Date().toISOString()}).eq("id",category.id);if(e)setError(e.message);else await load();setBusy(false)};
+ return <div className="space-y-6"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-medium text-muted-foreground">Catalogue</p><h2 className="mt-1 text-3xl font-semibold tracking-tight">Categories</h2><p className="mt-2 max-w-2xl text-muted-foreground">Manage the categories used by the storefront and product editor. Deactivation is used instead of deletion so existing products and order history remain safe.</p></div><Button onClick={openNew}><Plus className="mr-2 size-4"/>Add category</Button></div>{error&&<p role="alert" className="rounded-lg border border-destructive/30 p-3 text-sm text-destructive">{error}</p>}<Card><CardHeader className="gap-4 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle>Catalogue categories</CardTitle><CardDescription>{loading?"Loading categories…":`${rows.length} categories`}</CardDescription></div><div className="relative w-full sm:w-72"><Search className="absolute left-3 top-3 size-4 text-muted-foreground"/><Input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Search categories" className="pl-9" aria-label="Search categories"/></div></CardHeader><CardContent>{loading?<p className="py-8 text-sm text-muted-foreground">Loading categories…</p>:rows.length===0?<p className="py-8 text-sm text-muted-foreground">No categories found.</p>:<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{rows.map(category=>{const fallback=catalogueCategories.find(c=>c.slug===category.slug)?.image;return <div key={category.id} className="overflow-hidden rounded-xl border bg-background"><div className="aspect-[16/8] bg-muted">{category.image_url?<SafeImage src={category.image_url} fallbackSrc={fallback} alt={category.name} className="h-full w-full object-cover"/>:fallback?<SafeImage src={fallback} alt={category.name} className="h-full w-full object-cover"/>:<div className="flex h-full items-center justify-center text-muted-foreground"><ImageOff className="size-6"/></div>}</div><div className="space-y-3 p-4"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2 font-medium"><FolderTree className="size-4 text-muted-foreground"/>{category.name}</div><span className="rounded-full border px-2 py-1 text-xs">{category.active?"Active":"Inactive"}</span></div><p className="min-h-10 text-sm text-muted-foreground">{category.description||"No description"}</p><div className="border-t pt-3 text-xs text-muted-foreground"><p>/{category.slug} · Order {category.sort_order}</p><p className="mt-1">{category.productCount} products · {category.activeProductCount} active</p></div><div className="flex gap-2 pt-1"><Button size="sm" variant="outline" onClick={()=>openEdit(category)}><Pencil className="mr-1 size-4"/>Edit</Button><Button size="sm" variant="outline" disabled={busy} onClick={()=>void toggle(category)}>{category.active?"Deactivate":"Activate"}</Button></div></div></div>})}</div>}</CardContent></Card>{editing&&<Card><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle>{editing.id?"Edit category":"Add category"}</CardTitle><CardDescription>Keep slugs stable once products are live because storefront URLs may depend on them.</CardDescription></div><Button size="icon" variant="ghost" onClick={()=>setEditing(null)} aria-label="Close category editor"><X className="size-4"/></Button></div></CardHeader><CardContent className="space-y-4"><div className="grid gap-4 sm:grid-cols-2"><Input aria-label="Category name" placeholder="Category name" value={editing.name} onChange={e=>setEditing(d=>d?{...d,name:e.target.value,slug:d.id?d.slug:e.target.value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}:d)}/><Input aria-label="Category slug" placeholder="Slug" value={editing.slug} onChange={e=>setEditing(d=>d?{...d,slug:e.target.value}:d)}/><Input aria-label="Category description" placeholder="Description" value={editing.description??""} onChange={e=>setEditing(d=>d?{...d,description:e.target.value}:d)}/><Input aria-label="Category image URL" placeholder="Image URL (optional)" value={editing.image_url??""} onChange={e=>setEditing(d=>d?{...d,image_url:e.target.value}:d)}/><Input aria-label="Category sort order" type="number" min="0" step="1" placeholder="Sort order" value={editing.sort_order} onChange={e=>setEditing(d=>d?{...d,sort_order:Number(e.target.value)}:d)}/><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.active} onChange={e=>setEditing(d=>d?{...d,active:e.target.checked}:d)}/> Active in storefront</label></div><div className="flex gap-2"><Button disabled={busy} onClick={()=>void save()}>{busy?"Saving…":"Save category"}</Button><Button variant="outline" disabled={busy} onClick={()=>setEditing(null)}>Cancel</Button></div></CardContent></Card>}</div>;
 }
