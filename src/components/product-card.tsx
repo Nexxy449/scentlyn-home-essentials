@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 
+import { SafeImage } from "@/components/safe-image";
 import { useCart } from "@/lib/cart";
 import { formatPrice, fromPrice, waLink, type Product } from "@/lib/shop-data";
 
@@ -15,7 +16,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="group flex min-w-0 flex-col overflow-hidden rounded-[1.25rem] border border-border/70 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift">
       <div className="relative">
         <Link to="/product/$slug" params={{ slug: product.slug }} className="relative block aspect-[4/4.5] overflow-hidden bg-surface">
-          <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+          <SafeImage src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
         </Link>
         <button type="button" aria-label={`Save ${product.name}`} className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur transition-transform hover:scale-105">
           <Heart className="h-4 w-4" />
