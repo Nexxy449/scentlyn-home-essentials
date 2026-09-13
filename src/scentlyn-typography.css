@@ -1,36 +1,78 @@
-/* Scentlyn editorial typography — styling only; existing wording is unchanged. */
+/* Scentlyn editorial typography and site-wide visual system. */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
 
 :root {
   --scentlyn-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --scentlyn-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Same palette used by the homepage, now shared by the whole site. */
+  --background: #fbf7f0;
+  --foreground: #18344a;
+  --surface: #f5eee4;
+  --card: #fffdf9;
+  --card-foreground: #18344a;
+  --popover: #fffdf9;
+  --popover-foreground: #18344a;
+  --primary: #b8924f;
+  --primary-foreground: #fffdf9;
+  --brand: #0d344d;
+  --brand-foreground: #fffdf9;
+  --fresh: #e8eee8;
+  --fresh-foreground: #18344a;
+  --secondary: #efe6da;
+  --secondary-foreground: #18344a;
+  --muted: #f3ece3;
+  --muted-foreground: #65727b;
+  --accent: #efe3d5;
+  --accent-foreground: #18344a;
+  --border: #e5dbce;
+  --input: #e5dbce;
+  --ring: #b8924f;
+  --sidebar: #f5eee4;
+  --sidebar-foreground: #18344a;
+  --sidebar-primary: #b8924f;
+  --sidebar-primary-foreground: #fffdf9;
+  --sidebar-accent: #efe3d5;
+  --sidebar-accent-foreground: #18344a;
+  --sidebar-border: #e5dbce;
+  --sidebar-ring: #b8924f;
+  --shadow-card: 0 10px 30px -22px rgba(24, 52, 74, .35);
+  --shadow-lift: 0 28px 65px -35px rgba(24, 52, 74, .35);
 }
 
-body:has(header) header a[aria-label="Scentlyn Laundrymart home"] span:first-child,
-body:has(header) header .font-display {
-  font-family: var(--scentlyn-display);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: -0.04em;
-  line-height: .88;
-}
-
-body:has(header) header a[aria-label="Scentlyn Laundrymart home"] span:last-child {
+body {
   font-family: var(--scentlyn-body);
-  font-weight: 500;
-  letter-spacing: .24em;
-  text-transform: uppercase;
+  background: var(--background);
+  color: var(--foreground);
 }
 
-body:has(header) header > div:first-child {
+body header {
+  border-color: rgba(229, 219, 206, .8);
+  background: rgba(255, 253, 249, .94);
+  box-shadow: 0 8px 28px -24px rgba(24, 52, 74, .35);
+}
+
+body header > div:first-child {
+  background: #0d344d;
+  color: #fffdf9;
   font-family: var(--scentlyn-body);
   font-size: .68rem;
   font-weight: 600;
-  letter-spacing: .22em;
+  letter-spacing: .18em;
   text-transform: uppercase;
 }
 
-body:has(header) header nav a {
+body header .font-display,
+body header a[aria-label="Scentlyn home"] span:first-child {
+  font-family: var(--scentlyn-display);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: .88;
+}
+
+body header nav a {
+  color: #53616b;
   font-family: var(--scentlyn-body);
   font-size: .78rem;
   font-weight: 500;
@@ -38,30 +80,54 @@ body:has(header) header nav a {
   text-transform: uppercase;
 }
 
-body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main h1 {
-  font-family: var(--scentlyn-display);
-  font-style: italic;
-  font-weight: 500;
-  letter-spacing: -.045em;
-  line-height: .94;
+body header nav a:hover,
+body header nav a[data-status="active"] {
+  background: #efe6da;
+  color: #18344a;
 }
 
-body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main h2 {
+main h1,
+main h2,
+main h3,
+main h4 {
+  color: #18344a;
+}
+
+main h1,
+main h2 {
   font-family: var(--scentlyn-display);
   font-weight: 500;
   letter-spacing: -.025em;
 }
 
-body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main p,
-body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main a,
-body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main button {
+main p,
+main a,
+main button,
+main input,
+main select,
+main textarea {
   font-family: var(--scentlyn-body);
 }
 
+main section {
+  border-color: #e5dbce;
+}
+
+main .bg-primary,
+main [class*="bg-brand"] {
+  color: #fffdf9;
+}
+
 @media (max-width: 640px) {
-  body:has(header) header > div:first-child { font-size: .58rem; letter-spacing: .15em; }
-  body:has(header) header nav a { font-size: .72rem; letter-spacing: .07em; }
-  body:has(img[alt="A calm, beautifully styled home with fresh linen and fragrance"]) main h1 {
+  body header > div:first-child {
+    font-size: .58rem;
+    letter-spacing: .15em;
+  }
+  body header nav a {
+    font-size: .72rem;
+    letter-spacing: .07em;
+  }
+  main h1 {
     font-size: clamp(2.75rem, 13vw, 4.2rem);
   }
 }
