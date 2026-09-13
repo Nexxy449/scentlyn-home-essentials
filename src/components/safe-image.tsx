@@ -1,5 +1,5 @@
 import { ImageOff } from "lucide-react";
-import { useState, type ImgHTMLAttributes } from "react";
+import { useEffect, useState, type ImgHTMLAttributes } from "react";
 
 type SafeImageProps = ImgHTMLAttributes<HTMLImageElement> & {
   fallbackSrc?: string | null;
@@ -9,10 +9,17 @@ type SafeImageProps = ImgHTMLAttributes<HTMLImageElement> & {
  * Prevent a bad/expired remote image URL from leaving a broken-image icon.
  * If the primary image fails, the optional bundled fallback is tried once.
  * If that also fails, a neutral image placeholder is rendered.
+ * The failure state is reset whenever the requested image source changes so
+ * a newly uploaded/replaced product image can render immediately.
  */
 export function SafeImage({ fallbackSrc, src, alt = "", onError, ...props }: SafeImageProps) {
   const [failed, setFailed] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+    setUsingFallback(false);
+  }, [src, fallbackSrc]);
 
   const currentSrc = failed ? undefined : usingFallback ? fallbackSrc ?? undefined : src;
 
